@@ -27,6 +27,7 @@ const MENSAJES = {
   conceptoSinNombre: "Poné un nombre para este concepto.",
   horasVacias: "Indicá cuántas horas le dedicás a cada lote.",
   valorHoraVacio: "Indicá cuánto querés ganar por hora.",
+  sueldoVacio: "Indicá cuánto querés ganar por mes.",
 } as const;
 
 /** Número mayor a cero (opcionalmente entero). */
@@ -145,9 +146,24 @@ export function validarCostos(calculo: Calculo): ErrorValidacion[] {
     ),
   ];
 
-  // Trabajo propio: si completó uno de los dos datos, tiene que completar los dos.
   const { horasPorLote, valorHora } = calculo.trabajoPropio;
-  if (!estaVacio(horasPorLote) || !estaVacio(valorHora)) {
+  if (calculo.trabajoPropio.modo === "sueldo") {
+    // Modo «sueldo»: un solo monto por mes; las horas al mes (opcionales) tienen que ser válidas si se cargan.
+    const { sueldoMensual = "", horasMensuales } = calculo.trabajoPropio;
+    if (!estaVacio(sueldoMensual)) {
+      const sueldo = montoNoNegativo(MENSAJES.sueldoVacio).safeParse(sueldoMensual);
+      if (!sueldo.success) {
+        errores.push({ campo: "trabajoPropio.sueldoMensual", mensaje: sueldo.error.issues[0].message, severidad: "error" });
+      }
+    }
+    if (!estaVacio(horasMensuales)) {
+      const horas = numeroPositivo(MENSAJES.horasVacias).safeParse(horasMensuales);
+      if (!horas.success) {
+        errores.push({ campo: "trabajoPropio.horasMensuales", mensaje: horas.error.issues[0].message, severidad: "error" });
+      }
+    }
+  } else if (!estaVacio(horasPorLote) || !estaVacio(valorHora)) {
+    // Modo «hora»: si completó uno de los dos datos, tiene que completar los dos.
     const horas = numeroPositivo(MENSAJES.horasVacias).safeParse(horasPorLote);
     if (!horas.success) {
       errores.push({ campo: "trabajoPropio.horasPorLote", mensaje: horas.error.issues[0].message, severidad: "error" });

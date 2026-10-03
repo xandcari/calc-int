@@ -33,7 +33,9 @@ import {
 interface EstadoCalculo {
   calculo: Calculo;
   actualizarConfiguracion: (cambios: Partial<Omit<Configuracion, "volumenMensual">>) => void;
-  actualizarTrabajoPropio: (cambios: Partial<Pick<TrabajoPropio, "horasPorLote" | "valorHora">>) => void;
+  actualizarTrabajoPropio: (
+    cambios: Partial<Pick<TrabajoPropio, "horasPorLote" | "valorHora" | "modo" | "sueldoMensual" | "horasMensuales">>,
+  ) => void;
   actualizarPrecio: (cambios: Partial<Precio>) => void;
   agregarConcepto: (categoria: CategoriaCosto, nombre?: string) => void;
   actualizarConcepto: (categoria: CategoriaCosto, id: string, cambios: CambiosConcepto) => void;

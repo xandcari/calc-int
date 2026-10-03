@@ -2,7 +2,7 @@ import Decimal from "decimal.js";
 
 import type { Calculo, DecimalString } from "@/domain/types";
 
-import { calcularResumenCostos, importeValido, montoMensual } from "./costos";
+import { calcularResumenCostos, importeValido, montoMensual, totalTrabajoMensual } from "./costos";
 import { aDecimalString } from "./decimal";
 import { leerNumero } from "./numeros";
 
@@ -82,6 +82,8 @@ export interface LineaDetalle {
 }
 
 export interface DetalleTrabajoPropio {
+  /** «sueldo»: el total es el sueldo pretendido y no hay horas × valor por hora para mostrar. */
+  modo: "hora" | "sueldo";
   horasPorLote: DecimalString;
   valorHora: DecimalString;
   lotes: DecimalString;
@@ -124,10 +126,11 @@ export function detalleDeCostos(calculo: EntradaResumen): DetalleCostos {
     .filter(conMonto);
 
   const t = calculo.trabajoPropio;
-  const totalTrabajo = importeValido(t.horasMensuales).times(importeValido(t.valorHora));
-  const trabajoPropio =
+  const totalTrabajo = totalTrabajoMensual(t);
+  const trabajoPropio: DetalleTrabajoPropio | null =
     t.incluir && totalTrabajo.greaterThan(0)
       ? {
+          modo: t.modo ?? "hora",
           horasPorLote: t.horasPorLote,
           valorHora: t.valorHora,
           lotes: calculo.configuracion.lotes,

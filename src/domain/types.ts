@@ -100,14 +100,25 @@ export type CategoriaCosto = ConceptoCosto["categoria"];
 // 3. Trabajo propio
 // ─────────────────────────────────────────────
 
+/**
+ * Cómo cuenta su trabajo el usuario (ejemplo propuesto para el modo revendedor, pendiente de validar):
+ * «hora» (por defecto) = horas por lote × valor por hora; «sueldo» = sueldo pretendido, un monto fijo por mes.
+ */
+export type ModoTrabajo = "hora" | "sueldo";
+
 export interface TrabajoPropio {
   /** Si el usuario decide incluir el valor de su tiempo en el costo. */
   incluir: boolean;
+  /** Ausente = «hora» (así siguen funcionando los borradores guardados antes de este cambio). */
+  modo?: ModoTrabajo;
+  /** Sueldo pretendido por mes. Solo se usa en modo «sueldo»: pasa directo al costo fijo, sin multiplicar. */
+  sueldoMensual?: DecimalString;
   /** Horas que le dedica a cada lote. */
   horasPorLote: DecimalString;
   /**
    * Horas trabajadas por mes = `horasPorLote × lotes`.
    * Se mantiene sincronizado al editar (ver `horasMensualesDesdeLotes` en motor/costos.ts).
+   * En modo «sueldo» es un dato opcional y solo informativo (horas al mes que le dedica): no entra al cálculo.
    */
   horasMensuales: DecimalString;
   /** Cuánto vale una hora de trabajo. */

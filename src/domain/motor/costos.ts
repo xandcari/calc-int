@@ -6,6 +6,7 @@ import type {
   CostoVariable,
   DecimalString,
   Frecuencia,
+  TrabajoPropio,
 } from "@/domain/types";
 
 import { aDecimalString } from "./decimal";
@@ -58,6 +59,27 @@ export function horasMensualesDesdeLotes(horasPorLote: DecimalString, lotes: Dec
   return h && l ? aDecimalString(h.times(l)) : "";
 }
 
+/**
+ * Valor del tiempo propio por mes.
+ * Modo «hora» (por defecto): horas mensuales × valor por hora. Modo «sueldo»: el sueldo pretendido tal cual.
+ */
+export function totalTrabajoMensual(t: TrabajoPropio): Decimal {
+  if (!t.incluir) return CERO;
+  if (t.modo === "sueldo") return importeValido(t.sueldoMensual ?? "");
+  return importeValido(t.horasMensuales).times(importeValido(t.valorHora));
+}
+
+/**
+ * Dato de referencia para el modo «sueldo»: cuánto equivale el sueldo por hora trabajada.
+ * Es solo informativo (no se usa en el cálculo). Null si falta el sueldo o las horas al mes.
+ */
+export function valorHoraEquivalente(sueldoMensual: DecimalString, horasMensuales: DecimalString): DecimalString | null {
+  const sueldo = leerNumero(sueldoMensual);
+  const horas = leerNumero(horasMensuales);
+  if (!sueldo || !horas || sueldo.isNegative() || !horas.isPositive() || horas.isZero()) return null;
+  return aDecimalString(sueldo.dividedBy(horas));
+}
+
 export interface ResumenCostos {
   /** Gastos fijos mensuales (alquiler, servicios…). */
   totalGastosFijosMensual: DecimalString;
@@ -91,9 +113,7 @@ export function calcularResumenCostos(calculo: EntradaResumen): ResumenCostos {
   const indirectos = sumarPorPeriodo(calculo.costosIndirectos);
 
   const { trabajoPropio } = calculo;
-  const trabajo = trabajoPropio.incluir
-    ? importeValido(trabajoPropio.horasMensuales).times(importeValido(trabajoPropio.valorHora))
-    : CERO;
+  const trabajo = totalTrabajoMensual(trabajoPropio);
 
   const costoFijoTotal = gastosFijos.plus(indirectos).plus(trabajo);
   const cvu = sumarVariables(calculo.costosVariables);

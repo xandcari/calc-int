@@ -9,7 +9,7 @@ import { Boton, BotonLink } from "@/components/ui/boton";
 import { Campo } from "@/components/ui/campo";
 import { CampoMonto } from "@/components/ui/campo-monto";
 import { Tarjeta } from "@/components/ui/tarjeta";
-import { calcularResumenCostos } from "@/domain/motor/costos";
+import { calcularResumenCostos, valorHoraEquivalente } from "@/domain/motor/costos";
 import type { CategoriaCosto } from "@/domain/types";
 import { hayErrores, validarConfiguracion, validarCostos } from "@/domain/validaciones";
 import { useHidratado } from "@/hooks/use-hidratado";
@@ -130,6 +130,10 @@ function Formulario() {
 
   const { trabajoPropio } = calculo;
   const tieneTrabajo = resumen.totalTrabajoPropioMensual !== "0";
+  const porSueldo = trabajoPropio.modo === "sueldo";
+  const horaEquivalente = porSueldo
+    ? valorHoraEquivalente(trabajoPropio.sueldoMensual ?? "", trabajoPropio.horasMensuales)
+    : null;
   const erroresVisibles = intento && hayErrores(errores);
 
   return (
@@ -214,6 +218,86 @@ function Formulario() {
               Lo calculamos como costo fijo mensual.
             </Encabezado>
             <div className="flex flex-col gap-5">
+              {/* Ejemplo propuesto (modo revendedor): se puede quitar sin afectar el resto del recorrido. */}
+              <div role="radiogroup" aria-label="Cómo querés contar tu trabajo" className="grid grid-cols-2 gap-3">
+                {(
+                  [
+                    { valor: "hora", etiqueta: "Por hora" },
+                    { valor: "sueldo", etiqueta: "Sueldo pretendido" },
+                  ] as const
+                ).map((opcion) => {
+                  const activo = (trabajoPropio.modo ?? "hora") === opcion.valor;
+                  return (
+                    <button
+                      key={opcion.valor}
+                      type="button"
+                      role="radio"
+                      aria-checked={activo}
+                      onClick={() => actualizarTrabajoPropio({ modo: opcion.valor })}
+                      className={`rounded-xl border px-3 py-3 text-base font-medium focus-visible:outline-2 focus-visible:outline-primary-600 ${
+                        activo
+                          ? "border-primary-600 bg-primary-600 text-white"
+                          : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+                      }`}
+                    >
+                      {opcion.etiqueta}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {porSueldo ? (
+                <>
+                  <Campo
+                    idControl="sueldo-mensual"
+                    etiqueta="¿Cuánto querés ganar por mes con este producto?"
+                    error={mensajeDe("trabajoPropio.sueldoMensual")}
+                    idError="sueldo-mensual-error"
+                  >
+                    <CampoMonto
+                      id="sueldo-mensual"
+                      placeholder="Ej: 150000"
+                      value={trabajoPropio.sueldoMensual ?? ""}
+                      invalido={Boolean(mensajeDe("trabajoPropio.sueldoMensual"))}
+                      idError="sueldo-mensual-error"
+                      onBlur={() => tocar("trabajoPropio.sueldoMensual")}
+                      onChange={(valor) => actualizarTrabajoPropio({ sueldoMensual: valor })}
+                    />
+                  </Campo>
+                  <Campo
+                    idControl="horas-mensuales-referencia"
+                    etiqueta="¿Cuántas horas al mes le dedicás? (opcional)"
+                    error={mensajeDe("trabajoPropio.horasMensuales")}
+                    idError="horas-mensuales-referencia-error"
+                  >
+                    <CampoMonto
+                      id="horas-mensuales-referencia"
+                      prefijo={null}
+                      sufijo="hs"
+                      placeholder="Ej: 40"
+                      value={trabajoPropio.horasMensuales}
+                      invalido={Boolean(mensajeDe("trabajoPropio.horasMensuales"))}
+                      idError="horas-mensuales-referencia-error"
+                      onBlur={() => tocar("trabajoPropio.horasMensuales")}
+                      onChange={(valor) => actualizarTrabajoPropio({ horasMensuales: valor })}
+                    />
+                  </Campo>
+                  {horaEquivalente ? (
+                    <p className="text-sm text-gray-600" aria-live="polite">
+                      Si le dedicás {formatearCantidad(trabajoPropio.horasMensuales)} hs al mes, tu sueldo equivale a{" "}
+                      <strong>{formatearMonto(horaEquivalente)} la hora</strong>. Es solo informativo: no cambia el cálculo.
+                    </p>
+                  ) : null}
+                  {tieneTrabajo ? (
+                    <p className="rounded-xl bg-primary-50 px-4 py-3 text-sm text-primary-700" aria-live="polite">
+                      Sueldo pretendido: <strong>{formatearMonto(resumen.totalTrabajoPropioMensual)} / mes</strong>
+                    </p>
+                  ) : null}
+                </>
+              ) : null}
+
+              {porSueldo ? null : (
+              <>
               <Campo
                 idControl="horas-por-lote"
                 etiqueta="¿Cuántas horas le dedicás a cada lote?"
@@ -277,6 +361,8 @@ function Formulario() {
                   <strong>{formatearMonto(resumen.totalTrabajoPropioMensual)} / mes</strong>
                 </p>
               ) : null}
+              </>
+              )}
               <Subtotal etiqueta="Subtotal trabajo propio" valor={formatearMonto(resumen.totalTrabajoPropioMensual)} />
             </div>
           </Tarjeta>

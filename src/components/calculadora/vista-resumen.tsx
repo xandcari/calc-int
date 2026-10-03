@@ -144,8 +144,14 @@ function Resumen() {
               <h3 className="text-sm font-medium text-gray-500">Trabajo propio mensual</h3>
               <div className="mt-2 flex items-baseline justify-between gap-3 text-sm text-gray-700">
                 <span>
-                  {formatearCantidad(detalle.trabajoPropio.horasPorLote)} hs × {formatearMonto(detalle.trabajoPropio.valorHora)}/h ×{" "}
-                  {formatearCantidad(detalle.trabajoPropio.lotes)} lotes
+                  {detalle.trabajoPropio.modo === "sueldo" ? (
+                    "Sueldo pretendido"
+                  ) : (
+                    <>
+                      {formatearCantidad(detalle.trabajoPropio.horasPorLote)} hs × {formatearMonto(detalle.trabajoPropio.valorHora)}/h ×{" "}
+                      {formatearCantidad(detalle.trabajoPropio.lotes)} lotes
+                    </>
+                  )}
                 </span>
                 <span className="font-medium text-gray-900">{formatearMonto(detalle.trabajoPropio.totalMensual)}</span>
               </div>

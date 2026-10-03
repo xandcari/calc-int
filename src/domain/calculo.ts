@@ -62,10 +62,14 @@ function sincronizarLotes(calculo: Calculo): Calculo {
   return {
     ...calculo,
     configuracion: { ...calculo.configuracion, volumenMensual: volumenDesdeLotes(unidadesPorLote, lotes) },
-    trabajoPropio: {
-      ...calculo.trabajoPropio,
-      horasMensuales: horasMensualesDesdeLotes(calculo.trabajoPropio.horasPorLote, lotes),
-    },
+    // En modo «sueldo» las horas al mes las carga el usuario (opcional): no se derivan de los lotes.
+    trabajoPropio:
+      calculo.trabajoPropio.modo === "sueldo"
+        ? calculo.trabajoPropio
+        : {
+            ...calculo.trabajoPropio,
+            horasMensuales: horasMensualesDesdeLotes(calculo.trabajoPropio.horasPorLote, lotes),
+          },
   };
 }
 
@@ -82,12 +86,20 @@ export function actualizarConfiguracion(
 
 export function actualizarTrabajoPropio(
   calculo: Calculo,
-  cambios: Partial<Pick<TrabajoPropio, "horasPorLote" | "valorHora">>,
+  cambios: Partial<Pick<TrabajoPropio, "horasPorLote" | "valorHora" | "modo" | "sueldoMensual" | "horasMensuales">>,
   ahora: string,
 ): Calculo {
   const trabajoPropio = { ...calculo.trabajoPropio, ...cambios };
-  // Se incluye el tiempo apenas el usuario completa alguno de los dos datos.
-  trabajoPropio.incluir = !estaVacio(trabajoPropio.horasPorLote) || !estaVacio(trabajoPropio.valorHora);
+  // Al pasar a «sueldo» las horas al mes arrancan vacías (son un dato aparte, opcional); al volver a «hora» se
+  // recalculan desde los lotes. Los datos del otro modo no se borran: cambiar de modo se puede deshacer.
+  if (cambios.modo === "sueldo" && calculo.trabajoPropio.modo !== "sueldo" && cambios.horasMensuales === undefined) {
+    trabajoPropio.horasMensuales = "";
+  }
+  // Se incluye el tiempo apenas el usuario completa el dato que corresponde al modo elegido.
+  trabajoPropio.incluir =
+    trabajoPropio.modo === "sueldo"
+      ? !estaVacio(trabajoPropio.sueldoMensual ?? "")
+      : !estaVacio(trabajoPropio.horasPorLote) || !estaVacio(trabajoPropio.valorHora);
   return tocar(sincronizarLotes({ ...calculo, trabajoPropio }), ahora);
 }
 
