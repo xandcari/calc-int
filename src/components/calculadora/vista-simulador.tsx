@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, type ReactNode } from "react";
 
+import { ComparacionEscenarios, type EscenarioConResultado } from "@/components/calculadora/comparacion-escenarios";
 import { Aviso } from "@/components/ui/aviso";
 import { Boton, BotonLink } from "@/components/ui/boton";
 import { DialogoConfirmar } from "@/components/ui/dialogo-confirmar";
@@ -63,6 +64,16 @@ function Simulador() {
 
   const meta = metaDeVentas(analisis?.puntoEquilibrioUnidades ?? null);
   const escenarios = calculo.escenarios;
+  const resultados = new Map(
+    escenarios.map((e) => [
+      e.id,
+      simularVariaciones(calculo, precio, { insumosPct: e.insumosPct, precioPct: e.precioPct, produccionPct: e.produccionPct }),
+    ]),
+  );
+  const paraComparar: EscenarioConResultado[] = escenarios.flatMap((escenario) => {
+    const resultado = resultados.get(escenario.id);
+    return resultado ? [{ escenario, resultado }] : [];
+  });
   const llegoAlMaximo = escenarios.length >= MAX_ESCENARIOS;
   const escenarioAEliminar = escenarios.find((e) => e.id === idAEliminar) ?? null;
   const pctInsumos = escenarios.find((e) => Number(e.insumosPct) > 0)?.insumosPct;
@@ -100,11 +111,7 @@ function Simulador() {
             <TarjetaEscenario
               key={escenario.id}
               escenario={escenario}
-              resultado={simularVariaciones(calculo, precio, {
-                insumosPct: escenario.insumosPct,
-                precioPct: escenario.precioPct,
-                produccionPct: escenario.produccionPct,
-              })}
+              resultado={resultados.get(escenario.id) ?? null}
               puedeDuplicar={!llegoAlMaximo}
               onCambiar={(cambios) => actualizarEscenario(escenario.id, cambios)}
               onDuplicar={() => duplicarEscenario(escenario.id)}
@@ -122,6 +129,8 @@ function Simulador() {
           {escenarios.length} de {MAX_ESCENARIOS} escenarios
         </span>
       </div>
+
+      <ComparacionEscenarios base={base} escenarios={paraComparar} />
 
       <Aviso tono="consejo">
         El escenario de suba de insumos es el más importante. Los materiales siempre suben. ¿Tu negocio sigue siendo
@@ -375,4 +384,4 @@ function Metrica({
       )}
     </div>
   );
-}
+}
