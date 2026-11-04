@@ -24,7 +24,7 @@ export function Pasos() {
 
   return (
     <nav aria-label="Pasos del cálculo">
-      <ol className="flex items-center gap-1 sm:gap-2">
+      <ol className="flex flex-wrap items-center gap-1 sm:gap-2">
         {PASOS.map((paso, i) => {
           const esActual = i === actual;
           const completado = actual > i;

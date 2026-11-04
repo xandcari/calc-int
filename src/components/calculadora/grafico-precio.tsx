@@ -305,12 +305,12 @@ function TablaDatos({
 
   return (
     <details className="group mt-4">
-      <summary className="inline-flex cursor-pointer list-none rounded text-sm font-semibold text-primary-700 underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700 [&::-webkit-details-marker]:hidden">
+      <summary className="inline-flex min-h-6 cursor-pointer list-none items-center rounded text-sm font-semibold text-primary-700 underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700 [&::-webkit-details-marker]:hidden">
         <span className="group-open:hidden">Ver datos</span>
         <span className="hidden group-open:inline">Ocultar datos</span>
       </summary>
       <div
-        className="mt-3 overflow-x-auto rounded-xl border border-gray-200"
+        className="relative mt-3 overflow-x-auto rounded-xl border border-gray-200"
         role="region"
         tabIndex={0}
         aria-label="Tabla de datos del gráfico, desplazable"

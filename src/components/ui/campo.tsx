@@ -9,6 +9,11 @@ export function clasesCampo(invalido: boolean): string {
   return `${CLASES_CAMPO} ${invalido ? "border-danger-600 bg-danger-50" : "border-gray-400"}`;
 }
 
+/** Id del texto de ayuda de un campo; el control lo usa en `aria-describedby` para que el lector lo anuncie. */
+export function idDescripcionDe(idControl: string): string {
+  return `${idControl}-descripcion`;
+}
+
 interface PropsCampo {
   /** `id` del control, para asociar la etiqueta. */
   idControl: string;
@@ -29,7 +34,11 @@ export function Campo({ idControl, etiqueta, descripcion, error, idError, childr
       <label htmlFor={idControl} className="text-base font-medium text-gray-900">
         {etiqueta}
       </label>
-      {descripcion ? <p className="text-sm text-gray-500">{descripcion}</p> : null}
+      {descripcion ? (
+        <p id={idDescripcionDe(idControl)} className="text-sm text-gray-500">
+          {descripcion}
+        </p>
+      ) : null}
       {children}
       {error ? (
         <p id={idError} role="alert" className="flex items-start gap-1.5 text-sm font-medium text-danger-700">

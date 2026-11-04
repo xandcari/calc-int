@@ -20,7 +20,7 @@ export function ComoSeCalcula({ formula, cuenta, tono = "claro", etiqueta = "Ver
   return (
     <details className="group mt-3">
       <summary
-        className={`inline-flex cursor-pointer list-none items-center gap-1.5 rounded text-sm font-medium underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 [&::-webkit-details-marker]:hidden ${
+        className={`inline-flex min-h-6 cursor-pointer list-none items-center gap-1.5 rounded text-sm font-medium underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 [&::-webkit-details-marker]:hidden ${
           oscuro ? "text-accent-400 focus-visible:outline-white" : "text-primary-700 focus-visible:outline-primary-700"
         }`}
       >

@@ -18,6 +18,8 @@ interface PropsCampoMonto {
   placeholder?: string;
   invalido?: boolean;
   idError?: string;
+  /** Id del texto de ayuda del campo (ver `idDescripcionDe`): se suma a `aria-describedby`. */
+  idDescripcion?: string;
   /** Texto fijo antes del número. Por defecto "$". Pasar `null` para no mostrar nada. */
   prefijo?: string | null;
   /** Texto fijo después del número. Ej.: "hs". */
@@ -45,6 +47,7 @@ export function CampoMonto({
   placeholder,
   invalido = false,
   idError,
+  idDescripcion,
   prefijo = "$",
   sufijo,
   className = "",
@@ -69,7 +72,7 @@ export function CampoMonto({
         autoComplete="off"
         aria-label={ariaLabel}
         aria-invalid={invalido || undefined}
-        aria-describedby={invalido ? idError : undefined}
+        aria-describedby={[idDescripcion, invalido ? idError : undefined].filter(Boolean).join(" ") || undefined}
         placeholder={placeholder}
         value={mostrado}
         onChange={(e) => {

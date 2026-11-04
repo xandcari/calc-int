@@ -6,7 +6,7 @@ import { useMemo, useState, type ReactNode } from "react";
 import { Ayuda } from "@/components/ui/ayuda";
 import { Aviso } from "@/components/ui/aviso";
 import { Boton, BotonLink } from "@/components/ui/boton";
-import { Campo } from "@/components/ui/campo";
+import { Campo, idDescripcionDe } from "@/components/ui/campo";
 import { CampoMonto } from "@/components/ui/campo-monto";
 import { Tarjeta } from "@/components/ui/tarjeta";
 import { calcularResumenCostos, costoVariableUnitarioDe, insumoSeCargaPorLote } from "@/domain/motor/costos";
@@ -288,6 +288,7 @@ function Formulario() {
                   >
                     <CampoMonto
                       id="sueldo-mensual"
+                      idDescripcion={idDescripcionDe("sueldo-mensual")}
                       placeholder="Ej: 300000"
                       value={trabajoPropio.sueldoMensual}
                       invalido={Boolean(mensajeDe("trabajoPropio.sueldoMensual"))}

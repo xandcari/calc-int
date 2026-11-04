@@ -8,7 +8,7 @@ import { Controller, useForm } from "react-hook-form";
 import { Ayuda } from "@/components/ui/ayuda";
 import { Aviso } from "@/components/ui/aviso";
 import { Boton } from "@/components/ui/boton";
-import { Campo, clasesCampo } from "@/components/ui/campo";
+import { Campo, clasesCampo, idDescripcionDe } from "@/components/ui/campo";
 import { DialogoConfirmar } from "@/components/ui/dialogo-confirmar";
 import { CampoMonto } from "@/components/ui/campo-monto";
 import { Tarjeta } from "@/components/ui/tarjeta";
@@ -262,6 +262,7 @@ function Formulario() {
                 render={({ field }) => (
                   <CampoMonto
                     id="lotes"
+                    idDescripcion={TEXTOS_RUTA[ruta].pistaVolumen ? idDescripcionDe("lotes") : undefined}
                     ref={field.ref}
                     prefijo={null}
                     placeholder={ruta === "lotes" ? "Ej: 2" : "Ej: 80"}

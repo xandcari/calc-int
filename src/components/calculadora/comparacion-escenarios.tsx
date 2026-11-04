@@ -84,7 +84,7 @@ export function ComparacionEscenarios({ base, escenarios }: Props) {
       </div>
 
       <div
-        className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm"
+        className="relative overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm"
         role="region"
         tabIndex={0}
         aria-label="Tabla de comparación, desplazable"
