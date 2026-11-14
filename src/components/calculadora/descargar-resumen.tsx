@@ -10,6 +10,10 @@ const CLASE_IMPRIMIENDO = "imprimiendo-resumen";
 const ID_RESUMEN = "resumen-final";
 
 const MENSAJE_LISTO = "Listo, tu resumen se descargó. Guardalo para comparar cuando cambien tus costos.";
+// El navegador no avisa si el PDF se guardó o se canceló: tras cerrar la impresión el aviso no asegura que se descargó.
+const MENSAJE_IMPRESION = "Cerraste la ventana de impresión. Si elegiste «Guardar como PDF», tu resumen ya quedó guardado.";
+// Solo es true cuando la impresión la pidió este panel (afterprint también salta al cancelar o al imprimir otra cosa).
+let impresionPropia = false;
 
 /** ¿Hay un resumen para descargar en esta pantalla? (solo existe en el simulador, cuando hay precio). */
 export function hayResumenParaDescargar(): boolean {
@@ -19,6 +23,7 @@ export function hayResumenParaDescargar(): boolean {
 /** Abre la ventana de impresión del navegador mostrando solo el resumen final (desde ahí se guarda como PDF). */
 export function imprimirResumen(): void {
   document.body.classList.add(CLASE_IMPRIMIENDO);
+  impresionPropia = true;
   window.print();
 }
 
@@ -89,10 +94,12 @@ export function DescargarResumen({ producto }: { producto: string }) {
   const [confirmando, setConfirmando] = useState(false);
   const [mensaje, setMensaje] = useState<{ texto: string; error: boolean } | null>(null);
 
-  // Al cerrar la ventana de impresión se avisa que el resumen quedó listo.
+  // Al cerrar la ventana de impresión se avisa, sin asegurar que se guardó (el navegador no lo informa).
   useEffect(() => {
     function alTerminar() {
-      if (document.body.classList.contains(CLASE_IMPRIMIENDO)) setMensaje({ texto: MENSAJE_LISTO, error: false });
+      if (!impresionPropia) return;
+      impresionPropia = false;
+      setMensaje({ texto: MENSAJE_IMPRESION, error: false });
     }
     window.addEventListener("afterprint", alTerminar);
     return () => window.removeEventListener("afterprint", alTerminar);
