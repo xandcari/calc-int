@@ -4,18 +4,14 @@ import Decimal from "decimal.js";
 import { useMemo, type ReactNode } from "react";
 
 import { Aviso } from "@/components/ui/aviso";
-import { Ayuda } from "@/components/ui/ayuda";
 import { BotonLink } from "@/components/ui/boton";
 import { Tarjeta } from "@/components/ui/tarjeta";
 import { ComoSeCalcula } from "@/components/ui/como-se-calcula";
 import { calcularResumenCostos } from "@/domain/motor/costos";
 import {
   composicionCostoUnitario,
-  contribucionUnitaria,
   costoTotalPorLote,
   detalleDeCostos,
-  MARGEN_REFERENCIA,
-  precioSugerido,
   type LineaDetalle,
   type PartidaComposicion,
 } from "@/domain/motor/resumen";
@@ -69,28 +65,26 @@ function Resumen() {
 
   const costoUnitario = resumen.costoUnitario!;
   const porLote = costoTotalPorLote(costoUnitario, unidadesPorLote);
-  const precio = precioSugerido(costoUnitario, MARGEN_REFERENCIA);
-  const contribucion = precio ? contribucionUnitaria(precio, resumen.costoVariableUnitario) : null;
 
   return (
     <div className="flex flex-col gap-8">
       <div>
         <p className="mb-1 text-xs font-bold uppercase tracking-widest text-primary-600">Paso 3 de 5</p>
         <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-          Esto es lo que te cuesta producir {producto ? `tu ${producto}` : "tu producto"}
+          Esto es lo que te cuesta producir{producto ? `: ${producto}` : " tu producto"}
         </h1>
         <p className="mt-2 text-lg text-gray-700">Revisá los números. Si algo no cierra, volvé a Costos y ajustá.</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="rounded-2xl bg-primary-900 p-5 text-white shadow-sm">
-          <p className="text-sm font-medium">Costo unitario real</p>
+          <p className="text-xs font-bold uppercase tracking-widest">Costo unitario real</p>
           <p className="mt-2 text-3xl font-extrabold tracking-tight">{formatearMonto(costoUnitario)}</p>
           <p className="mt-2 text-sm text-primary-100">lo que te cuesta hacer una sola unidad</p>
           <ComoSeCalcula
-            tono="oscuro"
-            formula="Costo fijo total ÷ unidades por mes + costo variable por unidad"
-            cuenta={`${formatearMonto(resumen.costoFijoTotalMensual)} ÷ ${formatearCantidad(resumen.volumenMensual)} + ${formatearMonto(resumen.costoVariableUnitario)} = ${formatearMonto(costoUnitario)}`}
+            tono="celeste"
+            formula="(Costo fijo / mes ÷ unidades) + variables"
+            cuenta={`(${formatearMonto(resumen.costoFijoTotalMensual)} ÷ ${formatearCantidad(resumen.volumenMensual)}) + ${formatearMonto(resumen.costoVariableUnitario)} = ${formatearMonto(costoUnitario)}`}
           />
         </div>
         {ruta === "lotes" ? (
@@ -107,42 +101,23 @@ function Resumen() {
         </TarjetaDato>
       </div>
 
-      {contribucion && precio ? (
-        <section aria-labelledby="contribucion" className="rounded-2xl border border-success-100 bg-success-50 p-5">
-          <div className="flex items-center gap-2">
-            <h2 id="contribucion" className="text-base font-medium text-gray-900">
-              Contribución por unidad
-            </h2>
-            <Ayuda
-              sobre="contribución por unidad"
-              texto="Lo que te queda de cada venta después de pagar los insumos, antes de cubrir tus gastos fijos."
-              ejemplo="si vendés a $500 y los materiales costaron $85, tu contribución es $415 por unidad."
-            />
-          </div>
-          <p className="mt-1 text-3xl font-extrabold tracking-tight text-success-700">{formatearMonto(contribucion)}</p>
-          <p className="mt-1 text-sm text-success-700">
-            {formatearMonto(precio)} − {formatearMonto(resumen.costoVariableUnitario)} = {formatearMonto(contribucion)}
-          </p>
-          <p className="mt-1 text-sm text-gray-700">Lo que deja cada unidad para cubrir los gastos fijos.</p>
-        </section>
-      ) : null}
-
       {composicion ? (
         <Tarjeta aria-labelledby="composicion">
           <h2 id="composicion" className="text-lg font-semibold text-gray-900">
             Composición del costo unitario
           </h2>
           <ul className="mt-4 flex flex-col gap-4">
-            <FilaComposicion etiqueta="Trabajo propio" partida={composicion.trabajoPropio} color="bg-blue-600" />
-            <FilaComposicion etiqueta="Gastos fijos" partida={composicion.gastosFijos} color="bg-success-500" />
-            <FilaComposicion etiqueta="Costos indirectos" partida={composicion.indirectos} color="bg-violet-500" />
-            <FilaComposicion etiqueta="Materiales / insumos" partida={composicion.materiales} color="bg-orange-500" />
+            {/* Colores del Figma (Paso3-Resumen): marino, verde, celeste y ocre. */}
+            <FilaComposicion etiqueta="Trabajo propio" partida={composicion.trabajoPropio} color="bg-primary-900" />
+            <FilaComposicion etiqueta="Gastos fijos" partida={composicion.gastosFijos} color="bg-success-600" />
+            <FilaComposicion etiqueta="Costos indirectos" partida={composicion.indirectos} color="bg-accent-400" />
+            <FilaComposicion etiqueta="Materiales / insumos" partida={composicion.materiales} color="bg-warning-700" />
           </ul>
         </Tarjeta>
       ) : null}
 
       <details open className="group rounded-2xl border border-gray-200 bg-white shadow-sm">
-        <summary className="flex cursor-pointer list-none items-center justify-between rounded-2xl px-6 py-4 font-semibold text-primary-600 focus-visible:outline-2 focus-visible:outline-primary-600 [&::-webkit-details-marker]:hidden">
+        <summary className="flex cursor-pointer list-none items-center justify-between rounded-2xl px-6 py-4 font-medium text-gray-900 focus-visible:outline-2 focus-visible:outline-primary-600 [&::-webkit-details-marker]:hidden">
           Ver detalle completo de costos
           <span aria-hidden="true" className="text-sm transition-transform group-open:rotate-0 group-[:not([open])]:rotate-180">
             ▲
@@ -154,7 +129,7 @@ function Resumen() {
           <BloqueDetalle titulo="Costos variables por unidad" lineas={detalle.variables} />
           {detalle.trabajoPropio ? (
             <div>
-              <h3 className="text-sm font-medium text-gray-500">Trabajo propio mensual</h3>
+              <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500">Trabajo propio mensual</h3>
               <div className="mt-2 flex items-baseline justify-between gap-3 text-sm text-gray-700">
                 <span>
                   {detalle.trabajoPropio.sueldoDirecto ? (
@@ -180,9 +155,9 @@ function Resumen() {
 
       <div className="flex items-center justify-between gap-3">
         <BotonLink href="/calculadora/costos" variante="secundario">
-          ← Atrás
+          Atrás
         </BotonLink>
-        <BotonLink href="/calculadora/precio">Continuar →</BotonLink>
+        <BotonLink href="/calculadora/precio">Continuar</BotonLink>
       </div>
     </div>
   );
@@ -191,7 +166,7 @@ function Resumen() {
 function TarjetaDato({ titulo, valor, children }: { titulo: string; valor: string; children: ReactNode }) {
   return (
     <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-      <p className="text-sm font-medium text-gray-700">{titulo}</p>
+      <p className="text-xs font-bold uppercase tracking-widest text-gray-700">{titulo}</p>
       <p className="mt-2 text-3xl font-extrabold tracking-tight text-gray-900">{valor}</p>
       <p className="mt-2 text-sm text-gray-500">{children}</p>
     </div>
@@ -221,7 +196,7 @@ function BloqueDetalle({ titulo, lineas }: { titulo: string; lineas: LineaDetall
   const total = lineas.reduce((acc, l) => acc.plus(l.monto), new Decimal(0));
   return (
     <div>
-      <h3 className="text-sm font-medium text-gray-500">{titulo}</h3>
+      <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500">{titulo}</h3>
       <ul className="mt-2 divide-y divide-gray-100 text-sm">
         {lineas.map((l) => (
           <li key={l.id} className="flex items-baseline justify-between gap-3 py-2 text-gray-700">

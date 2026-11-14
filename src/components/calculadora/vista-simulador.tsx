@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState, type ReactNode } from "react";
 
 import { BotonGuardar } from "@/components/calculadora/boton-guardar";
@@ -8,10 +7,11 @@ import { ComparacionEscenarios, type EscenarioConResultado } from "@/components/
 import { ResumenFinal } from "@/components/calculadora/resumen-final";
 import { Aviso } from "@/components/ui/aviso";
 import { Boton, BotonLink } from "@/components/ui/boton";
+import { IndicadorCambio } from "@/components/ui/indicador-cambio";
 import { DialogoConfirmar } from "@/components/ui/dialogo-confirmar";
 import { Tarjeta } from "@/components/ui/tarjeta";
 import type { CambiosEscenario } from "@/domain/calculo";
-import { compararConBase } from "@/domain/motor/comparacion";
+import { compararConBase, type IndicadorId } from "@/domain/motor/comparacion";
 import {
   metaDeVentas,
   simularVariaciones,
@@ -24,7 +24,7 @@ import {
 import { MAX_ESCENARIOS, type EscenarioUsuario } from "@/domain/types";
 import { useAnalisisPrecio } from "@/hooks/use-analisis-precio";
 import { useHidratado } from "@/hooks/use-hidratado";
-import { formatearCantidad, formatearMonto, formatearPorcentaje, formatearVariacion } from "@/lib/formato";
+import { formatearCantidad, formatearMonto, formatearPorcentaje } from "@/lib/formato";
 import { useCalculoStore } from "@/store/calculo-store";
 
 function Esqueleto() {
@@ -44,14 +44,11 @@ export function VistaSimulador() {
 }
 
 function Simulador() {
-  const router = useRouter();
-  const reiniciar = useCalculoStore((s) => s.reiniciar);
   const agregarEscenario = useCalculoStore((s) => s.agregarEscenario);
   const duplicarEscenario = useCalculoStore((s) => s.duplicarEscenario);
   const actualizarEscenario = useCalculoStore((s) => s.actualizarEscenario);
   const eliminarEscenario = useCalculoStore((s) => s.eliminarEscenario);
   const { calculo, resumen, precio, analisis } = useAnalisisPrecio();
-  const [confirmandoReinicio, setConfirmandoReinicio] = useState(false);
   const [idAEliminar, setIdAEliminar] = useState<string | null>(null);
 
   const base = precio ? situacionBase(calculo, precio) : null;
@@ -80,7 +77,7 @@ function Simulador() {
   });
   const llegoAlMaximo = escenarios.length >= MAX_ESCENARIOS;
   const escenarioAEliminar = escenarios.find((e) => e.id === idAEliminar) ?? null;
-  const pctInsumos = escenarios.find((e) => Number(e.insumosPct) > 0)?.insumosPct;
+  const producto = calculo.configuracion.nombre.trim();
 
   return (
     <div className="flex flex-col gap-8">
@@ -88,14 +85,17 @@ function Simulador() {
         <p className="mb-1 text-xs font-bold uppercase tracking-widest text-primary-600">Paso 5 de 5</p>
         <h1 className="text-3xl font-bold tracking-tight text-gray-900">¿Qué pasa si…?</h1>
         <p className="mt-2 text-lg text-gray-700">
-          Movés los sliders y mirá cómo cambia tu negocio. No pasa nada real — solo jugamos con tus números.
+          Combiná cambios de costos, precio y producción para comparar distintos escenarios.
         </p>
       </div>
 
-      <section aria-labelledby="base" className="rounded-2xl bg-gray-900 p-6 text-white shadow-sm">
-        <h2 id="base" className="text-sm text-gray-200">
-          Situación actual (base)
-        </h2>
+      <section aria-labelledby="base" className="rounded-2xl bg-primary-900 p-6 text-white shadow-sm">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 id="base" className="text-xs font-bold uppercase tracking-widest text-gray-300">
+            Situación actual (base)
+          </h2>
+          {producto ? <p className="text-sm font-semibold">{producto}</p> : null}
+        </div>
         <dl className="mt-3 grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-4">
           <DatoBase etiqueta="Costo unitario" valor={formatearMonto(base.costoUnitario)} />
           <DatoBase etiqueta="Precio de venta" valor={formatearMonto(base.precio)} />
@@ -110,7 +110,7 @@ function Simulador() {
       {escenarios.length === 0 ? (
         <Aviso tono="consejo">No tenés escenarios. Agregá uno para empezar a comparar.</Aviso>
       ) : (
-        <div className="grid gap-4 lg:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2">
           {escenarios.map((escenario) => (
             <TarjetaEscenario
               key={escenario.id}
@@ -126,48 +126,57 @@ function Simulador() {
         </div>
       )}
 
-      <div className="flex flex-wrap items-center gap-3">
-        <Boton variante="secundario" onClick={() => agregarEscenario()} disabled={llegoAlMaximo}>
+      <div className="flex flex-col gap-2">
+        <button
+          type="button"
+          onClick={() => agregarEscenario()}
+          disabled={llegoAlMaximo}
+          className="min-h-11 w-full rounded-xl border border-dashed border-gray-400 bg-transparent px-5 py-3 text-sm font-medium text-gray-900 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
+        >
           + Agregar escenario
-        </Boton>
-        <span className="text-sm text-gray-500">
-          {escenarios.length} de {MAX_ESCENARIOS} escenarios
-        </span>
+        </button>
+        {llegoAlMaximo ? (
+          <p className="text-sm text-gray-500">Llegaste al máximo de {MAX_ESCENARIOS} escenarios.</p>
+        ) : null}
       </div>
 
       <ComparacionEscenarios base={base} escenarios={paraComparar} />
 
-      <Aviso tono="consejo">
-        El escenario de suba de insumos es el más importante. Los materiales siempre suben. ¿Tu negocio sigue siendo
-        rentable{pctInsumos ? ` con un ${pctInsumos}% más de costo` : " si suben tus costos"}?
-      </Aviso>
-
-      {analisis ? <ResumenFinal calculo={calculo} resumen={resumen} analisis={analisis} /> : null}
+      {/*
+        Resumen final (lo armó xandcari): ya no se ve en la pantalla, porque en Figma se descarga desde el panel
+        («Guardar resumen» / «Guardar como imagen»). Queda montado fuera de la vista para imprimirlo o capturarlo;
+        al imprimir, `globals.css` lo muestra solo a él. `inert` evita que el teclado o el lector de pantalla lo recorran.
+      */}
+      {analisis ? (
+        <div inert className="pointer-events-none fixed top-0 -left-[10000px] w-[56rem] print:static print:w-auto">
+          <ResumenFinal calculo={calculo} resumen={resumen} analisis={analisis} />
+        </div>
+      ) : null}
 
       <Tarjeta aria-labelledby="siguiente-paso" className="flex flex-col gap-4">
         <h2 id="siguiente-paso" className="text-base font-semibold text-gray-900">
           ¿Cuál es el siguiente paso?
         </h2>
         <ul className="grid gap-4 md:grid-cols-3">
-          <SiguientePaso icono="🎯" titulo="Fijar mi precio con confianza">
+          <SiguientePaso icono={ICONOS_PASO.objetivo} titulo="Fijar mi precio con confianza">
             Ya tenés todos los datos para salir al mercado con un precio fundamentado.
           </SiguientePaso>
-          <SiguientePaso icono="📅" titulo="Establecer una meta de ventas mensual">
+          <SiguientePaso icono={ICONOS_PASO.barras} titulo="Establecer una meta de ventas mensual">
             {meta
-              ? `Vendé al menos ${formatearCantidad(meta)} unidades/mes para tener ganancia real.`
-              : "Vendé por encima de tu punto de equilibrio para tener ganancia real."}
+              ? `Apuntá a vender al menos ${formatearCantidad(meta)} unidades/mes para tener ganancia real.`
+              : "Apuntá a vender por encima de tu punto de equilibrio para tener ganancia real."}
           </SiguientePaso>
-          <SiguientePaso icono="🔄" titulo="Revisar costos cada 3 meses">
-            Los precios cambian. Actualizá este cálculo cuando cambien tus insumos o tus tarifas.
+          <SiguientePaso icono={ICONOS_PASO.repetir} titulo="Revisar costos cada 3 meses">
+            Los precios cambian. Actualizá este cálculo cuando cambien tus insumos o tu tarifa.
           </SiguientePaso>
         </ul>
       </Tarjeta>
 
-      <div className="flex items-center justify-between gap-3">
+      {/* En Figma solo queda «Atrás»: para empezar otro cálculo está «Reiniciar» arriba. */}
+      <div>
         <BotonLink href="/calculadora/precio" variante="secundario">
-          ← Atrás
+          Atrás
         </BotonLink>
-        <Boton onClick={() => setConfirmandoReinicio(true)}>Calcular otro producto</Boton>
       </div>
 
       <BotonGuardar />
@@ -185,18 +194,6 @@ function Simulador() {
           setIdAEliminar(null);
         }}
       />
-
-      <DialogoConfirmar
-        abierto={confirmandoReinicio}
-        titulo="¿Calcular otro producto?"
-        descripcion="Vas a borrar lo que cargaste (producto, costos y precio) y volver al paso 1. Esta acción no se puede deshacer."
-        etiquetaConfirmar="Sí, empezar de nuevo"
-        onCancelar={() => setConfirmandoReinicio(false)}
-        onConfirmar={() => {
-          reiniciar();
-          router.push("/calculadora/producto");
-        }}
-      />
     </div>
   );
 }
@@ -210,13 +207,45 @@ function DatoBase({ etiqueta, valor }: { etiqueta: string; valor: string }) {
   );
 }
 
-function SiguientePaso({ icono, titulo, children }: { icono: string; titulo: string; children: ReactNode }) {
+const trazo = {
+  width: 20,
+  height: 20,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: 2,
+  strokeLinecap: "round" as const,
+  strokeLinejoin: "round" as const,
+  "aria-hidden": true,
+};
+
+/** Íconos de línea del Figma para «¿Cuál es el siguiente paso?». */
+const ICONOS_PASO = {
+  objetivo: (
+    <svg {...trazo}>
+      <circle cx="12" cy="12" r="9" />
+      <circle cx="12" cy="12" r="5" />
+      <path d="m12 12 7-7M16 5h3v3" />
+    </svg>
+  ),
+  barras: (
+    <svg {...trazo}>
+      <path d="M4 20h16M7 16v-4M11 16V8M15 16v-6M19 16V6" />
+    </svg>
+  ),
+  repetir: (
+    <svg {...trazo}>
+      <path d="M3 12a9 9 0 1 0 3-6.7L3 8" />
+      <path d="M3 3v5h5" />
+    </svg>
+  ),
+};
+
+function SiguientePaso({ icono, titulo, children }: { icono: ReactNode; titulo: string; children: ReactNode }) {
   return (
-    <li className="rounded-xl bg-primary-50 p-4">
-      <h3 className="flex items-center gap-2 text-sm font-semibold text-gray-900">
-        <span aria-hidden="true">{icono}</span>
-        {titulo}
-      </h3>
+    <li className="rounded-xl bg-primary-100 p-4">
+      <span className="text-gray-900">{icono}</span>
+      <h3 className="mt-2 text-base font-semibold text-gray-900">{titulo}</h3>
       <p className="mt-2 text-sm text-gray-700">{children}</p>
     </li>
   );
@@ -243,7 +272,13 @@ function TarjetaEscenario({
 
   return (
     <Tarjeta aria-labelledby={idNombre} className="flex flex-col gap-4">
-      <div>
+      <div className="flex items-center gap-3">
+        <span className="text-gray-900">
+          <svg {...trazo}>
+            <path d="m3 17 6-6 4 4 8-8" />
+            <path d="M15 7h6v6" />
+          </svg>
+        </span>
         <label htmlFor={idNombre} className="sr-only">
           Nombre del escenario
         </label>
@@ -253,7 +288,7 @@ function TarjetaEscenario({
           value={escenario.nombre}
           maxLength={40}
           onChange={(e) => onCambiar({ nombre: e.target.value })}
-          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-base font-semibold text-gray-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-base text-gray-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
         />
       </div>
 
@@ -280,13 +315,11 @@ function TarjetaEscenario({
 
       {resultado ? <Resultado base={base} resultado={resultado} /> : null}
 
-      <div className="flex flex-wrap gap-2">
-        {puedeDuplicar ? (
-          <Boton variante="secundario" onClick={onDuplicar}>
-            Duplicar<span className="sr-only"> {escenario.nombre}</span>
-          </Boton>
-        ) : null}
-        <Boton variante="secundario" onClick={onEliminar}>
+      <div className="grid grid-cols-2 gap-2">
+        <Boton variante="secundario" onClick={onDuplicar} disabled={!puedeDuplicar} className="text-gray-900">
+          Duplicar<span className="sr-only"> {escenario.nombre}</span>
+        </Boton>
+        <Boton variante="secundario" onClick={onEliminar} className="text-gray-900">
           Eliminar<span className="sr-only"> {escenario.nombre}</span>
         </Boton>
       </div>
@@ -314,9 +347,9 @@ function ControlVariacion({
         <label htmlFor={id} className="text-gray-700">
           {etiqueta}
         </label>
-        <output htmlFor={id} className="font-semibold text-primary-600">
-          {signo}
-          {numero}%
+        {/* En Figma, sin cambio se ve «–»; con cambio, el porcentaje con signo. */}
+        <output htmlFor={id} className="font-semibold text-gray-900">
+          {numero === 0 ? "–" : `${signo}${numero}%`}
         </output>
       </div>
       <input
@@ -332,70 +365,41 @@ function ControlVariacion({
       />
       <div className="mt-1 flex justify-between text-xs text-gray-500" aria-hidden="true">
         <span>{VARIACION_MINIMA_PCT}%</span>
+        <span>0%</span>
         <span>+{VARIACION_MAXIMA_PCT}%</span>
       </div>
     </div>
   );
 }
 
+/** Las cinco métricas de cada escenario, en el orden del Figma. */
+const METRICAS: { id: IndicadorId; etiqueta: string; unidad: "monto" | "unidades" | "puntos"; valor: (r: ResultadoEscenario) => string }[] = [
+  { id: "costoUnitario", etiqueta: "Costo unitario", unidad: "monto", valor: (r) => formatearMonto(r.costoUnitario) },
+  { id: "precio", etiqueta: "Precio de venta", unidad: "monto", valor: (r) => formatearMonto(r.precio) },
+  { id: "margenNeto", etiqueta: "Margen neto", unidad: "puntos", valor: (r) => formatearPorcentaje(r.margenNetoPct) },
+  {
+    id: "puntoEquilibrio",
+    etiqueta: "Punto de equilibrio",
+    unidad: "unidades",
+    valor: (r) => (r.puntoEquilibrio ? `${formatearCantidad(r.puntoEquilibrio)} uds` : "—"),
+  },
+  { id: "gananciaMensual", etiqueta: "Ganancia mensual", unidad: "monto", valor: (r) => formatearMonto(r.gananciaMensual) },
+];
+
 function Resultado({ base, resultado }: { base: Situacion; resultado: ResultadoEscenario }) {
-  const { variaciones } = resultado;
-  // El punto de equilibrio se muestra en unidades enteras (redondeado hacia arriba): el porcentaje sale de esas mismas
-  // unidades, igual que en la tabla de comparación, para que la tarjeta y la tabla nunca digan cosas distintas.
-  const equilibrioPct = compararConBase(base, resultado).puntoEquilibrio.porcentaje;
+  // La misma comparación que usa la tabla (motor): la tarjeta y la tabla nunca dicen cosas distintas.
+  const comparacion = compararConBase(base, resultado);
   return (
-    <div aria-live="polite" className="flex flex-col gap-3">
-      <dl className="grid grid-cols-2 gap-2">
-        <Metrica etiqueta="Costo unitario" valor={formatearMonto(resultado.costoUnitario)} pct={variaciones.costoUnitarioPct} subirEsBueno={false} />
-        <Metrica etiqueta="Precio de venta" valor={formatearMonto(resultado.precio)} pct={variaciones.precioPct} subirEsBueno />
-        <Metrica
-          etiqueta="BEP (uds)"
-          valor={resultado.puntoEquilibrio ? `${formatearCantidad(resultado.puntoEquilibrio)} uds` : "—"}
-          pct={equilibrioPct}
-          subirEsBueno={false}
-        />
-        <Metrica etiqueta="Ganancia mensual" valor={formatearMonto(resultado.gananciaMensual)} pct={variaciones.gananciaPct} subirEsBueno />
-      </dl>
-      <div className="flex items-center justify-between rounded-xl bg-primary-50 px-4 py-3">
-        <span className="text-sm text-gray-700">Margen neto</span>
-        <span className={`text-2xl font-extrabold ${Number(resultado.margenNetoPct) < 0 ? "text-danger-700" : "text-primary-600"}`}>
-          {formatearPorcentaje(resultado.margenNetoPct)}
-        </span>
-      </div>
-    </div>
-  );
-}
-
-function Metrica({
-  etiqueta,
-  valor,
-  pct,
-  subirEsBueno,
-}: {
-  etiqueta: string;
-  valor: string;
-  pct: string | null;
-  subirEsBueno: boolean;
-}) {
-  const cambio = pct === null ? 0 : Number(pct);
-  const sinCambio = Math.abs(cambio) < 0.05;
-  const bueno = subirEsBueno ? cambio > 0 : cambio < 0;
-  const color = sinCambio ? "text-gray-500" : bueno ? "text-success-700" : "text-danger-700";
-  const flecha = cambio < 0 ? "▼" : "▲";
-
-  return (
-    <div className="rounded-xl bg-gray-50 p-3">
-      <dt className="text-xs text-gray-500">{etiqueta}</dt>
-      <dd className="mt-1 text-sm font-semibold text-gray-900">{valor}</dd>
-      {pct === null ? null : (
-        <dd className={`mt-0.5 text-xs font-medium ${color}`}>
-          <span aria-hidden="true">{flecha} </span>
-          {formatearVariacion(pct)}
-          <span className="sr-only">
-            {sinCambio ? " sin cambios" : bueno ? " mejora" : " empeora"} respecto de la situación actual
-          </span>
-        </dd>
-      )}
-    </div>
+    <dl aria-live="polite" className="grid grid-cols-2 gap-2">
+      {METRICAS.map((m) => (
+        <div key={m.id} className="rounded-xl bg-gray-100 p-3">
+          <dt className="text-xs text-gray-700">{m.etiqueta}</dt>
+          <dd className="mt-1 text-base font-bold text-gray-900">{m.valor(resultado)}</dd>
+          <dd>
+            <IndicadorCambio cambio={comparacion[m.id]} unidad={m.unidad} nombre={m.etiqueta} />
+          </dd>
+        </div>
+      ))}
+    </dl>
   );
 }

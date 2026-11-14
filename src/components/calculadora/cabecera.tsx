@@ -33,12 +33,61 @@ export function Cabecera({ centro, derecha }: PropsCabecera) {
   );
 }
 
+const LEMA = "Una forma clara de ponerle precio a lo que hacés.";
+const AVISO_LEGAL = "Preciar es una ayuda para decidir y no reemplaza el asesoramiento de un contador.";
+const CREDITOS = "©2026 Preciar · Team27 · Un proyecto de InnovaLab";
+
+/** Pie del recorrido de pasos (Figma, «Footer»): marca y lema · aviso legal · créditos. */
 export function Pie() {
   return (
-    <footer className="mt-auto border-t border-gray-200">
-      <p className="mx-auto w-full max-w-6xl px-4 py-6 text-center text-sm text-gray-500 sm:px-6">
-        Preciar · Costos y precios claros. Gratis · Sin registro · Privado
-      </p>
+    <footer className="mt-auto bg-gray-100">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-8 sm:px-6 lg:flex-row lg:items-end lg:justify-between lg:gap-8">
+        <div>
+          <Logo />
+          <p className="mt-1 text-sm text-gray-700 lg:whitespace-nowrap">{LEMA}</p>
+        </div>
+        <p className="text-xs text-gray-700">{AVISO_LEGAL}</p>
+        <p className="text-sm text-gray-900 lg:whitespace-nowrap">{CREDITOS}</p>
+      </div>
+    </footer>
+  );
+}
+
+export interface EnlacePie {
+  href: string;
+  texto: string;
+}
+
+/** Pie de la portada (Figma, «Landing Home»): marca, aviso y créditos a la izquierda; enlaces a la derecha. */
+export function PieHome({ enlaces }: { enlaces: EnlacePie[] }) {
+  return (
+    <footer className="mt-auto bg-gray-100">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 sm:px-6 md:flex-row md:justify-between">
+        <div className="flex flex-col gap-6">
+          <div>
+            <Logo />
+            <p className="mt-1 text-sm text-gray-700">{LEMA}</p>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <p className="text-xs text-gray-700">{AVISO_LEGAL}</p>
+            <p className="text-sm text-gray-900">{CREDITOS}</p>
+          </div>
+        </div>
+        <nav aria-label="Enlaces del pie">
+          <ul className="flex flex-col gap-2 text-sm font-medium text-gray-700 md:items-end">
+            {enlaces.map((e) => (
+              <li key={e.href}>
+                <a
+                  href={e.href}
+                  className="rounded underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700"
+                >
+                  {e.texto}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </div>
     </footer>
   );
 }
