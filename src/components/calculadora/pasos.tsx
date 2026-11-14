@@ -21,10 +21,24 @@ const PASOS: Paso[] = [
 export function Pasos() {
   const pathname = usePathname();
   const actual = PASOS.findIndex((p) => p.href === pathname);
+  const hayPaso = actual >= 0;
 
   return (
     <nav aria-label="Pasos del cálculo">
-      <ol className="flex flex-wrap items-center gap-1 sm:gap-2">
+      {hayPaso ? (
+        <div className="sm:hidden">
+          <p className="text-sm font-semibold text-primary-900">
+            Paso {actual + 1} de {PASOS.length}: {PASOS[actual].etiqueta}
+          </p>
+          <div aria-hidden="true" className="mt-2 h-2 overflow-hidden rounded-full bg-gray-200">
+            <div
+              className="h-full rounded-full bg-primary-900"
+              style={{ width: `${((actual + 1) / PASOS.length) * 100}%` }}
+            />
+          </div>
+        </div>
+      ) : null}
+      <ol className={`${hayPaso ? "hidden sm:flex" : "flex"} flex-wrap items-center gap-1 sm:gap-2`}>
         {PASOS.map((paso, i) => {
           const esActual = i === actual;
           const completado = actual > i;
@@ -52,7 +66,7 @@ export function Pasos() {
               </span>
             </>
           );
-          const clases = "flex items-center gap-2 rounded-lg px-2 py-1.5";
+          const clases = "flex min-h-11 items-center gap-2 rounded-lg px-2 py-1.5";
 
           return (
             <li key={paso.etiqueta} className="flex items-center gap-1 sm:gap-2">

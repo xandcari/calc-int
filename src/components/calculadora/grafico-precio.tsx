@@ -132,6 +132,10 @@ function Grafico({
 
   return (
     <div className="mt-4" ref={contenedor}>
+      <p id="descripcion-grafico" className="sr-only">
+        {descripcion} Con tu precio de {formatearMonto(analisis.precio)} por unidad, cada una aporta {formatearMonto(new Decimal(analisis.precio).minus(costoVariable).toString())} después de los costos de materiales.
+        {volumen ? ` Tu volumen actual es de ${formatearCantidad(volumen)} unidades por mes.` : ""} Debajo del gráfico hay una tabla con los mismos datos.
+      </p>
       <ul className="mb-2 flex flex-wrap gap-5 text-sm text-gray-700">
         <li className="flex items-center gap-2">
           <span aria-hidden="true" className="flex items-center">
@@ -151,7 +155,7 @@ function Grafico({
         </li>
       </ul>
 
-      <svg width={ANCHO} height={ALTO} viewBox={`0 0 ${ANCHO} ${ALTO}`} role="img" aria-label={descripcion} className="h-auto w-full">
+      <svg width={ANCHO} height={ALTO} viewBox={`0 0 ${ANCHO} ${ALTO}`} role="img" aria-labelledby="titulo-grafico" aria-describedby="descripcion-grafico" className="h-auto w-full">
         {/* Zonas de pérdida (antes del cruce) y de ganancia (después), como en Figma. */}
         {xCruce !== null ? (
           <g>

@@ -34,7 +34,7 @@ function BotonReiniciar({ alReiniciar }: { alReiniciar: () => void }) {
       <button
         type="button"
         onClick={() => setConfirmando(true)}
-        className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-primary-700 hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700"
+        className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-primary-700 hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700"
       >
         <span aria-hidden="true">↻</span>
         Reiniciar
@@ -67,6 +67,12 @@ export function Recorrido({ children }: { children: ReactNode }) {
   return (
     <>
       <Hidratador />
+      <a
+        href="#contenido"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-primary-900 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white"
+      >
+        Saltar al contenido
+      </a>
       <Cabecera
         centro={<Pasos />}
         derecha={
@@ -83,7 +89,7 @@ export function Recorrido({ children }: { children: ReactNode }) {
           sinPanel ? "" : "lg:grid-cols-[minmax(0,1fr)_20rem]"
         }`}
       >
-        <main id="contenido" className="min-w-0">
+        <main id="contenido" tabIndex={-1} className="min-w-0 focus:outline-none">
           <Fragment key={version}>{children}</Fragment>
         </main>
         {sinPanel ? null : (

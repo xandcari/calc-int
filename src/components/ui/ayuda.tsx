@@ -32,7 +32,7 @@ export function Ayuda({ texto, ejemplo, sobre }: PropsAyuda) {
         onKeyDown={(e) => {
           if (e.key === "Escape") setAbierta(false);
         }}
-        className="relative inline-flex size-6 items-center justify-center rounded-full bg-gray-200 text-xs font-bold text-gray-700 before:absolute before:-inset-2 before:content-[''] hover:bg-gray-400 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary-600"
+        className="relative inline-flex size-6 items-center justify-center rounded-full bg-gray-200 text-xs font-bold text-gray-700 before:absolute before:-inset-2 before:content-[''] hover:bg-gray-300 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary-600"
       >
         ?
       </button>
@@ -43,7 +43,7 @@ export function Ayuda({ texto, ejemplo, sobre }: PropsAyuda) {
           className="absolute left-1/2 top-full z-10 mt-2 w-64 -translate-x-1/2 rounded-xl bg-gray-900 p-3 text-left text-sm font-normal leading-snug text-white shadow-lg"
         >
           {texto}
-          {ejemplo ? <span className="mt-2 block text-xs text-gray-400">Ej: {ejemplo}</span> : null}
+          {ejemplo ? <span className="mt-2 block text-sm text-gray-200">Ej: {ejemplo}</span> : null}
         </span>
       ) : null}
     </span>

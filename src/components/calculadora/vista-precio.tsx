@@ -359,7 +359,7 @@ function Resultados({
         ) : (
           <p className={`mt-4 text-sm font-medium ${analisis.estado === "supera" ? "text-success-100" : "text-warning-500"}`}>
             {sinCostosFijos
-              ? "Al no tener costos fijos, no tenés un punto de equilibrio mínimo. ¡Empezás a generar ganancia desde tu primera venta!"
+              ? "Sin costos fijos, tu punto de equilibrio es 0 unidades: cada venta suma desde la primera. ¿Ya sumaste tu tiempo de trabajo? Es el costo fijo que más se olvida."
               : analisis.estado === "supera"
                 ? "¡Estás vendiendo bien por encima de tu piso! Cada unidad extra ya es ganancia pura."
                 : "Necesitás aumentar el volumen o el precio para cubrir tus costos fijos."}
