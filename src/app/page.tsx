@@ -136,7 +136,7 @@ const PREGUNTAS = [
   {
     pregunta: "¿Qué pasa con los datos que cargo?",
     respuesta:
-      "No hace falta registrarte y no guardamos lo que cargás. Si querés conservar tu cálculo, descargá el resumen en PDF o como imagen antes de reiniciar.",
+      "No hace falta registrarte. Tu borrador queda solo en tu navegador, y solo se guarda en una cuenta si vos elegís hacerlo. Si querés conservar tu cálculo, descargá el resumen en PDF o como imagen antes de reiniciar.",
   },
 ];
 
@@ -216,7 +216,7 @@ export default function Home() {
               <BotonLink href="/calculadora/producto" variante="celeste" className="px-9 py-4 text-base font-medium">
                 Empezar mi cálculo
               </BotonLink>
-              <p className="text-sm text-white">Sin registrarte. No guardamos tus datos.</p>
+              <p className="text-sm text-white">No necesitás cuenta. Tu borrador queda solo en tu navegador.</p>
             </div>
           </div>
         </section>
@@ -322,7 +322,7 @@ export default function Home() {
                 </li>
               ))}
             </ul>
-            <Pildora fondo="bg-gray-100">Gratis y sin registro. Lo que cargás no se guarda.</Pildora>
+            <Pildora fondo="bg-gray-100">Gratis y sin registro. Tu borrador queda solo en tu navegador.</Pildora>
           </div>
         </section>
 
