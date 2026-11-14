@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 
+import { BotonGuardar } from "@/components/calculadora/boton-guardar";
 import { ComparacionEscenarios, type EscenarioConResultado } from "@/components/calculadora/comparacion-escenarios";
 import { ResumenFinal } from "@/components/calculadora/resumen-final";
 import { Aviso } from "@/components/ui/aviso";
@@ -177,6 +178,8 @@ function Simulador() {
           Atrás
         </BotonLink>
       </div>
+
+      <BotonGuardar />
 
       <DialogoConfirmar
         abierto={escenarioAEliminar !== null}

@@ -8,13 +8,18 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",
+    "@neondatabase/serverless": "^1.2.0",
+    "better-auth": "^1.7.14",
     "decimal.js": "^10.6.0",
+    "drizzle-orm": "^0.45.4",
     "html-to-image": "^1.11.13",
-    "next": "16.3.6",
+    "next": "^16.4.3",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "react-hook-form": "^7.88.0",
@@ -26,8 +31,10 @@
     "@types/node": "^24.13.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv": "^18.0.9",
+    "drizzle-kit": "^0.31.11",
     "eslint": "^9",
-    "eslint-config-next": "16.3.6",
+    "eslint-config-next": "^16.4.3",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^5.0.1"

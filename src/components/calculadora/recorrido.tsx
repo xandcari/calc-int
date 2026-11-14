@@ -11,6 +11,7 @@ import { useCalculoStore } from "@/store/calculo-store";
 
 import { Cabecera, Pie } from "./cabecera";
 import { Hidratador } from "./hidratador";
+import { MenuUsuario } from "./menu-usuario";
 import { Pasos } from "./pasos";
 import { ResumenEnVivo } from "./resumen-en-vivo";
 
@@ -87,12 +88,15 @@ export function Recorrido({ children }: { children: ReactNode }) {
       <Cabecera
         centro={<Pasos />}
         derecha={
-          hidratado ? (
-            <div className="flex items-center gap-2">
-              <NombreDelProducto />
-              <BotonReiniciar alReiniciar={() => setVersion((v) => v + 1)} />
-            </div>
-          ) : null
+          <div className="flex items-center gap-2">
+            <MenuUsuario />
+            {hidratado ? (
+              <>
+                <NombreDelProducto />
+                <BotonReiniciar alReiniciar={() => setVersion((v) => v + 1)} />
+              </>
+            ) : null}
+          </div>
         }
       />
       <div
