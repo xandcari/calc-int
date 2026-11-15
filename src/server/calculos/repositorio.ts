@@ -2,7 +2,7 @@ import { and, count, desc, eq } from "drizzle-orm";
 import type { BatchItem } from "drizzle-orm/batch";
 
 import { getDb } from "@/db";
-import { calculo, costoFijo, costoIndirecto, costoVariable, escenario } from "@/db/schema";
+import { calculo, costoFijo, costoIndirecto, costoVariable, escenario, VERSION_ESQUEMA } from "@/db/schema";
 import type { Calculo } from "@/domain/types";
 
 import {
@@ -73,7 +73,7 @@ export async function reemplazarCalculo(id: string, datos: CalculoParaGuardar) {
     comoLote([
       db
         .update(calculo)
-        .set({ ...calculoAColumnas(datos), versionEsquema: 1, actualizadoEn: ahora })
+        .set({ ...calculoAColumnas(datos), versionEsquema: VERSION_ESQUEMA, actualizadoEn: ahora })
         .where(eq(calculo.id, id)),
       db.delete(costoFijo).where(eq(costoFijo.calculoId, id)),
       db.delete(costoIndirecto).where(eq(costoIndirecto.calculoId, id)),

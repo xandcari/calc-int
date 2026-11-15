@@ -81,6 +81,7 @@ const costoVariable = z.object({
   ...conceptoBase,
   categoria: z.literal("variable"),
   montoUnitario: importeNoNegativo,
+  base: z.enum(["unidad", "lote"]).optional(),
 });
 
 const variacionPct = porcentajeEntre(VARIACION_MINIMA_PCT, VARIACION_MAXIMA_PCT);
@@ -102,7 +103,8 @@ export const esquemaCalculo = z.object({
     unidadesPorLote: importeNoNegativo,
     lotes: importeNoNegativo,
     volumenMensual: importeNoNegativo,
-    ruta: z.string().default("estandar"), // <-- Agregado para cumplir con CalculoParaGuardar
+    // Si un cliente viejo no manda la ruta, se asume «lotes» (cómo funcionaba el cálculo antes de existir la ruta).
+    ruta: z.enum(["lotes", "unidad", "reventa"]).default("lotes"),
   }),
   costosFijos: z.array(costoFijo).max(MAX_CONCEPTOS).refine(sinIdsRepetidos, MENSAJE_IDS_REPETIDOS),
   costosVariables: z.array(costoVariable).max(MAX_CONCEPTOS).refine(sinIdsRepetidos, MENSAJE_IDS_REPETIDOS),
@@ -112,7 +114,7 @@ export const esquemaCalculo = z.object({
     horasPorLote: importeNoNegativo,
     horasMensuales: importeNoNegativo,
     valorHora: importeNoNegativo,
-    sueldoMensual: importeNoNegativo, // <-- Agregado para cumplir con TrabajoPropio
+    sueldoMensual: importeNoNegativo.default(""),
   }),
   precio: z.object({
     modo: z.enum(["margen", "manual"]),
@@ -130,7 +132,6 @@ export type CalculateRequest = z.infer<typeof esquemaCalculo>;
 export const esquemaCompartir = z.object({ compartido: z.boolean() });
 
 // Chequeo de compilación: lo que valida Zod tiene que ser asignable al tipo del dominio.
-// Si alguien cambia `Calculo` y este archivo queda desactualizado, TypeScript lo marca acá.
-// Chequeo de compilación con casteo seguro para las uniones de tipos del dominio
+// Si alguien cambia `Calculo` y este archivo queda desactualizado, TypeScript lo marca acá (sin casteos).
 type Validado = z.infer<typeof esquemaCalculo>;
-export const _chequeoDeTipos = (c: Validado): CalculoParaGuardar => c as any;
+export const _chequeoDeTipos = (c: Validado): CalculoParaGuardar => c;

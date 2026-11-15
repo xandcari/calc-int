@@ -11,7 +11,28 @@ import { useCalculoStore } from "@/store/calculo-store";
  * Usá `hayBorradorLocal()` antes si querés avisarle al usuario.
  */
 export function cargarCalculo(datos: Calculo): void {
-  useCalculoStore.setState({ calculo: datos });
+  useCalculoStore.setState({ calculo: conValoresPorDefecto(datos) });
+}
+
+/**
+ * Red de seguridad: si al cálculo le falta algún campo que se agregó después de que se guardó (por ejemplo,
+ * la ruta de producción o el sueldo mensual), se completa con el valor inicial. Sin esto, un solo campo
+ * ausente o inválido rompe las pantallas, y como el borrador queda en el navegador, el error se repetiría
+ * en cada recarga. Lo ya cargado por el usuario nunca se pisa: los iniciales solo rellenan lo que falta
+ * (campo ausente o `undefined`).
+ */
+function conValoresPorDefecto(datos: Calculo): Calculo {
+  const inicial = crearCalculoInicial();
+  const completar = <T extends object>(porDefecto: T, recibido: T): T => {
+    const lleno = Object.fromEntries(Object.entries(recibido).filter(([, valor]) => valor !== undefined));
+    return { ...porDefecto, ...lleno };
+  };
+  return {
+    ...datos,
+    configuracion: completar(inicial.configuracion, datos.configuracion),
+    trabajoPropio: completar(inicial.trabajoPropio, datos.trabajoPropio),
+    precio: completar(inicial.precio, datos.precio),
+  };
 }
 
 /**

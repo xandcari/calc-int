@@ -87,29 +87,12 @@ export async function PUT(request: Request, { params }: Contexto) {
     const cuerpo = await leerJsonLimitado(request);
     if (!cuerpo.ok) return cuerpo.respuesta;
 
-    // Aseguramos que la configuración tenga un valor por defecto para 'ruta' si no viene en el body
-    const cuerpoDatos = cuerpo.datos as any;
-    const datosConRuta = {
-      ...cuerpoDatos,
-      configuracion: {
-        ruta: "estandar",
-        ...cuerpoDatos?.configuracion,
-      },
-    };
-
-    const resultado = esquemaCalculo.safeParse(datosConRuta);
+    const resultado = esquemaCalculo.safeParse(cuerpo.datos);
     if (!resultado.success) {
       return errorJson(400, "datos_invalidos", "Los datos del cálculo no son válidos.", detallesDeZod(resultado.error));
     }
 
-    // Casteamos con as any para evitar conflictos estrictos con la interfaz vieja de CalculoParaGuardar
-    return NextResponse.json(await reemplazarCalculo(id, {
-      ...resultado.data,
-      configuracion: {
-        ...resultado.data.configuracion,
-        ruta: (resultado.data.configuracion as any).ruta ?? "estandar",
-      },
-    } as any));
+    return NextResponse.json(await reemplazarCalculo(id, resultado.data));
   } catch (error) {
     console.error("PUT /api/calculos/[id]", error);
     return errorJson(500, "error_interno", "No pudimos guardar los cambios. Probá de nuevo en un rato.");

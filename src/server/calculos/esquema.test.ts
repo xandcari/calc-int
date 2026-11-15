@@ -126,6 +126,50 @@ describe("esquemaCalculo: límites y valores peligrosos", () => {
   });
 });
 
+describe("esquemaCalculo: ruta de producción, sueldo e insumos por lote", () => {
+  it("acepta las tres rutas y rechaza otra (incluida la vieja «estandar»)", () => {
+    for (const ruta of ["lotes", "unidad", "reventa"]) {
+      const c = valido();
+      c.configuracion.ruta = ruta as "lotes";
+      expect(esquemaCalculo.safeParse(c).success, ruta).toBe(true);
+    }
+    for (const mala of ["estandar", "mayorista", ""]) {
+      const c = valido();
+      (c.configuracion as { ruta: string }).ruta = mala;
+      expect(esquemaCalculo.safeParse(c).success, mala).toBe(false);
+    }
+  });
+
+  it("un cliente viejo sin ruta ni sueldo mensual queda con «lotes» y sueldo vacío", () => {
+    const c = valido() as unknown as { configuracion: Record<string, unknown>; trabajoPropio: Record<string, unknown> };
+    delete c.configuracion.ruta;
+    delete c.trabajoPropio.sueldoMensual;
+    const r = esquemaCalculo.safeParse(c);
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.configuracion.ruta).toBe("lotes");
+      expect(r.data.trabajoPropio.sueldoMensual).toBe("");
+    }
+  });
+
+  it("el sueldo mensual no puede ser negativo ni tener formato inválido", () => {
+    for (const malo of ["-1", "abc", "1,5"]) {
+      const c = valido();
+      c.trabajoPropio.sueldoMensual = malo;
+      expect(esquemaCalculo.safeParse(c).success, malo).toBe(false);
+    }
+  });
+
+  it("la base del insumo es «unidad», «lote» o no se indica", () => {
+    const ok1 = valido(); ok1.costosVariables[0].base = "lote";
+    expect(esquemaCalculo.safeParse(ok1).success).toBe(true);
+    const ok2 = valido(); delete ok2.costosVariables[0].base;
+    expect(esquemaCalculo.safeParse(ok2).success).toBe(true);
+    const mala = valido(); (mala.costosVariables[0] as { base: string }).base = "kilo";
+    expect(esquemaCalculo.safeParse(mala).success).toBe(false);
+  });
+});
+
 describe("esquemaCompartir", () => {
   it("exige un booleano", () => {
     expect(esquemaCompartir.safeParse({ compartido: false }).success).toBe(true);
