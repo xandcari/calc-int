@@ -55,17 +55,20 @@ CREATE TABLE "verification" (
 CREATE TYPE "tipo_oferta" AS ENUM ('producto', 'servicio');
 CREATE TYPE "moneda" AS ENUM ('ARS');
 CREATE TYPE "frecuencia" AS ENUM ('semanal', 'mensual', 'anual');
+CREATE TYPE "ruta_produccion" AS ENUM ('lotes', 'unidad', 'reventa');
+CREATE TYPE "base_insumo" AS ENUM ('unidad', 'lote');
 CREATE TYPE "modo_precio" AS ENUM ('margen', 'manual');
 CREATE TYPE "paso_recorrido" AS ENUM ('configuracion', 'costos', 'resumen', 'precio', 'simulador');
 
 CREATE TABLE "calculo" (
   "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   "usuario_id" text NOT NULL REFERENCES "user"("id") ON DELETE CASCADE,
-  "version_esquema" integer NOT NULL DEFAULT 1,
+  "version_esquema" integer NOT NULL DEFAULT 2,
   "compartido" boolean NOT NULL DEFAULT true,
   "tipo" "tipo_oferta" NOT NULL,
   "nombre" text NOT NULL,
   "moneda" "moneda" NOT NULL DEFAULT 'ARS',
+  "ruta" "ruta_produccion" NOT NULL DEFAULT 'lotes',
   "unidad_venta" text NOT NULL,
   "unidades_por_lote" numeric,
   "lotes" numeric,
@@ -74,6 +77,7 @@ CREATE TABLE "calculo" (
   "trabajo_horas_por_lote" numeric,
   "trabajo_horas_mensuales" numeric,
   "trabajo_valor_hora" numeric,
+  "trabajo_sueldo_mensual" numeric,
   "precio_modo" "modo_precio" NOT NULL,
   "precio_margen_pct" numeric,
   "precio_manual" numeric,
@@ -112,6 +116,7 @@ CREATE TABLE "costo_variable" (
   "nombre" text NOT NULL,
   "nota" text,
   "monto_unitario" numeric,
+  "base" "base_insumo",
   PRIMARY KEY ("calculo_id", "id")
 );
 

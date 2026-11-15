@@ -30,6 +30,10 @@ export const tipoOferta = pgEnum("tipo_oferta", ["producto", "servicio"]);
 export const moneda = pgEnum("moneda", ["ARS"]);
 export const frecuencia = pgEnum("frecuencia", ["semanal", "mensual", "anual"]);
 export const modoPrecio = pgEnum("modo_precio", ["margen", "manual"]);
+/** Ruta del paso 1 («¿Cómo producís?»). Los cálculos anteriores a la ruta quedan en «lotes». */
+export const rutaProduccion = pgEnum("ruta_produccion", ["lotes", "unidad", "reventa"]);
+/** Base del monto de un insumo: NULL = «por unidad» (no se indicó). Solo «lotes» admite «lote». */
+export const baseInsumo = pgEnum("base_insumo", ["unidad", "lote"]);
 export const pasoRecorrido = pgEnum("paso_recorrido", [
   "configuracion",
   "costos",
@@ -37,6 +41,14 @@ export const pasoRecorrido = pgEnum("paso_recorrido", [
   "precio",
   "simulador",
 ]);
+
+/**
+ * Versión del formato de las columnas. Historial:
+ *  1 = formato inicial.
+ *  2 = se agregan `ruta` (paso 1), `trabajo_sueldo_mensual` y `costo_variable.base`.
+ *      Los cálculos de la versión 1 se leen con ruta «lotes», sueldo vacío y base «por unidad».
+ */
+export const VERSION_ESQUEMA = 2;
 
 /** Un cálculo guardado. Su `id` es el que va en el link para compartir. */
 export const calculo = pgTable(
@@ -48,7 +60,7 @@ export const calculo = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     /** Versión del formato de las columnas, por si algún día hay que migrar datos viejos. */
-    versionEsquema: integer("version_esquema").notNull().default(1),
+    versionEsquema: integer("version_esquema").notNull().default(VERSION_ESQUEMA),
     /** false = el link deja de funcionar para los demás (el dueño lo sigue viendo). */
     compartido: boolean("compartido").notNull().default(true),
 
@@ -56,6 +68,8 @@ export const calculo = pgTable(
     tipo: tipoOferta("tipo").notNull(),
     nombre: text("nombre").notNull(),
     moneda: moneda("moneda").notNull().default("ARS"),
+    /** Ruta elegida en el paso 1. Los cálculos anteriores a la ruta quedan en «lotes». */
+    ruta: rutaProduccion("ruta").notNull().default("lotes"),
     unidadVenta: text("unidad_venta").notNull(),
     unidadesPorLote: numeric("unidades_por_lote"),
     lotes: numeric("lotes"),
@@ -66,6 +80,8 @@ export const calculo = pgTable(
     trabajoHorasPorLote: numeric("trabajo_horas_por_lote"),
     trabajoHorasMensuales: numeric("trabajo_horas_mensuales"),
     trabajoValorHora: numeric("trabajo_valor_hora"),
+    /** Sueldo fijo mensual (solo la ruta «reventa»). */
+    trabajoSueldoMensual: numeric("trabajo_sueldo_mensual"),
 
     // Precio (paso 4)
     precioModo: modoPrecio("precio_modo").notNull(),
@@ -118,6 +134,8 @@ export const costoVariable = pgTable(
   {
     ...columnasDeConcepto(),
     montoUnitario: numeric("monto_unitario"),
+    /** NULL = no se indicó (equivale a «por unidad»). Solo la ruta «lotes» usa «lote». */
+    base: baseInsumo("base"),
   },
   (t) => [primaryKey({ columns: [t.calculoId, t.id] })],
 );

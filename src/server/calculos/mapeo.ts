@@ -1,4 +1,5 @@
 import type {
+  BaseInsumo,
   Calculo,
   CostoFijo,
   CostoIndirecto,
@@ -7,6 +8,7 @@ import type {
   Frecuencia,
   ModoPrecio,
   PasoRecorrido,
+  RutaProduccion,
   TipoOferta,
 } from "@/domain/types";
 
@@ -32,6 +34,7 @@ export interface ColumnasCalculo {
   tipo: TipoOferta;
   nombre: string;
   moneda: "ARS";
+  ruta: RutaProduccion;
   unidadVenta: string;
   unidadesPorLote: string | null;
   lotes: string | null;
@@ -40,6 +43,7 @@ export interface ColumnasCalculo {
   trabajoHorasPorLote: string | null;
   trabajoHorasMensuales: string | null;
   trabajoValorHora: string | null;
+  trabajoSueldoMensual: string | null;
   precioModo: ModoPrecio;
   precioMargenPct: string | null;
   precioManual: string | null;
@@ -69,6 +73,8 @@ export interface FilaPorPeriodo extends FilaConceptoBase {
 
 export interface FilaVariable extends FilaConceptoBase {
   montoUnitario: string | null;
+  /** NULL = no se indicó (equivale a «por unidad»). */
+  base: BaseInsumo | null;
 }
 
 export interface FilaEscenario {
@@ -109,6 +115,7 @@ export function calculoAColumnas(c: CalculoParaGuardar): ColumnasCalculo {
     tipo: c.configuracion.tipo,
     nombre: c.configuracion.nombre,
     moneda: c.configuracion.moneda,
+    ruta: c.configuracion.ruta,
     unidadVenta: c.configuracion.unidadVenta,
     unidadesPorLote: aColumna(c.configuracion.unidadesPorLote),
     lotes: aColumna(c.configuracion.lotes),
@@ -117,6 +124,7 @@ export function calculoAColumnas(c: CalculoParaGuardar): ColumnasCalculo {
     trabajoHorasPorLote: aColumna(c.trabajoPropio.horasPorLote),
     trabajoHorasMensuales: aColumna(c.trabajoPropio.horasMensuales),
     trabajoValorHora: aColumna(c.trabajoPropio.valorHora),
+    trabajoSueldoMensual: aColumna(c.trabajoPropio.sueldoMensual),
     precioModo: c.precio.modo,
     precioMargenPct: aColumna(c.precio.margenPct),
     precioManual: aColumna(c.precio.precioManual),
@@ -146,6 +154,7 @@ export function calculoAFilasHijas(c: CalculoParaGuardar, calculoId: string): Fi
       nombre: x.nombre,
       nota: notaAColumna(x.nota),
       montoUnitario: aColumna(x.montoUnitario),
+      base: x.base ?? null,
     })),
     escenarios: c.escenarios.map((x, orden) => ({
       calculoId,
@@ -186,6 +195,7 @@ export function filasACalculo(fila: FilaCalculo, hijas: FilasHijas): Calculo {
     nombre: x.nombre,
     ...conNota(x.nota),
     montoUnitario: aDominio(x.montoUnitario),
+    ...(x.base ? { base: x.base } : {}),
   }));
   const escenarios: EscenarioUsuario[] = porOrden(hijas.escenarios).map((x) => ({
     id: x.id,
@@ -205,7 +215,7 @@ export function filasACalculo(fila: FilaCalculo, hijas: FilasHijas): Calculo {
       unidadesPorLote: aDominio(fila.unidadesPorLote),
       lotes: aDominio(fila.lotes),
       volumenMensual: aDominio(fila.volumenMensual),
-      ruta: (fila as any).ruta ?? "estandar",
+      ruta: fila.ruta,
     },
     costosFijos: fijos,
     costosVariables: variables,
@@ -215,7 +225,7 @@ export function filasACalculo(fila: FilaCalculo, hijas: FilasHijas): Calculo {
       horasPorLote: aDominio(fila.trabajoHorasPorLote),
       horasMensuales: aDominio(fila.trabajoHorasMensuales),
       valorHora: aDominio(fila.trabajoValorHora),
-      sueldoMensual: (fila as any).sueldoMensual ?? "0"
+      sueldoMensual: aDominio(fila.trabajoSueldoMensual),
     },
     precio: {
       modo: fila.precioModo,

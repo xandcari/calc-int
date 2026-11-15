@@ -40,15 +40,18 @@ function calculoCompleto(): Calculo {
       unidadesPorLote: "10",
       lotes: "4",
       volumenMensual: "40",
-      ruta: "estandar" as any, // <-- Casteado como any para los tests
+      ruta: "lotes",
     },
     costosFijos: [
       { id: "f1", categoria: "fijo", nombre: "Alquiler", monto: "150000.50", frecuencia: "mensual", nota: "Incluye expensas" },
       { id: "f2", categoria: "fijo", nombre: "Seguro", monto: "240000", frecuencia: "anual" },
     ],
-    costosVariables: [{ id: "v1", categoria: "variable", nombre: "Esterilla", montoUnitario: "1200" }],
+    costosVariables: [
+      { id: "v1", categoria: "variable", nombre: "Esterilla", montoUnitario: "1200", base: "lote" },
+      { id: "v2", categoria: "variable", nombre: "Aceite", montoUnitario: "35.5" },
+    ],
     costosIndirectos: [{ id: "i1", categoria: "indirecto", nombre: "Luz", monto: "9000", frecuencia: "semanal" }],
-    trabajoPropio: { incluir: true, horasPorLote: "2", horasMensuales: "8", valorHora: "5000", sueldoMensual: "0", },
+    trabajoPropio: { incluir: true, horasPorLote: "2", horasMensuales: "8", valorHora: "5000", sueldoMensual: "" },
     precio: { modo: "manual", margenPct: "40", precioManual: "12500.75" },
     pasoActual: "simulador",
   };
@@ -64,6 +67,23 @@ describe("mapeo Calculo ↔ filas", () => {
       creadoEn: CREADO.toISOString(),
       actualizadoEn: ACTUALIZADO.toISOString(),
     });
+  });
+
+  it("la ruta «reventa» con sueldo mensual vuelve idéntica", () => {
+    const original = calculoCompleto();
+    original.configuracion.ruta = "reventa";
+    original.costosVariables = [{ id: "v1", categoria: "variable", nombre: "Reventa", montoUnitario: "900" }];
+    original.trabajoPropio = { incluir: true, horasPorLote: "", horasMensuales: "", valorHora: "", sueldoMensual: "450000.50" };
+    const leido = ida_y_vuelta(original);
+    expect(leido.configuracion.ruta).toBe("reventa");
+    expect(leido.trabajoPropio).toEqual(original.trabajoPropio);
+    expect(leido.costosVariables).toEqual(original.costosVariables);
+  });
+
+  it("la base del insumo solo aparece si se indicó (null en la BD = no se indicó)", () => {
+    const hijas = calculoAFilasHijas(calculoCompleto(), ID);
+    expect(hijas.variables.map((v) => v.base)).toEqual(["lote", null]);
+    expect("base" in ida_y_vuelta(calculoCompleto()).costosVariables[1]).toBe(false);
   });
 
   it("el borrador vacío inicial (importes en blanco) también vuelve idéntico", () => {
