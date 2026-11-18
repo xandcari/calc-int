@@ -24,7 +24,7 @@ import {
 import { MAX_ESCENARIOS, type EscenarioUsuario } from "@/domain/types";
 import { useAnalisisPrecio } from "@/hooks/use-analisis-precio";
 import { useHidratado } from "@/hooks/use-hidratado";
-import { formatearCantidad, formatearMonto, formatearPorcentaje } from "@/lib/formato";
+import { formatearCantidad, formatearMonto, formatearPorcentaje, formatearUnidades } from "@/lib/formato";
 import { useCalculoStore } from "@/store/calculo-store";
 
 function Esqueleto() {
@@ -163,7 +163,7 @@ function Simulador() {
           </SiguientePaso>
           <SiguientePaso icono={ICONOS_PASO.barras} titulo="Establecer una meta de ventas mensual">
             {meta
-              ? `Apuntá a vender al menos ${formatearCantidad(meta)} unidades/mes para tener ganancia real.`
+              ? `Apuntá a vender al menos ${formatearUnidades(meta)}/mes para tener ganancia real.`
               : "Apuntá a vender por encima de tu punto de equilibrio para tener ganancia real."}
           </SiguientePaso>
           <SiguientePaso icono={ICONOS_PASO.repetir} titulo="Revisar costos cada 3 meses">

@@ -13,7 +13,7 @@ import { Tarjeta } from "@/components/ui/tarjeta";
 import { MARGEN_MAXIMO_PCT, nivelDeMargen, precioPorMargen, type NivelMargen } from "@/domain/motor/precio";
 import { useAnalisisPrecio } from "@/hooks/use-analisis-precio";
 import { useHidratado } from "@/hooks/use-hidratado";
-import { formatearCantidad, formatearMonto, formatearPorcentaje } from "@/lib/formato";
+import { formatearCantidad, formatearMonto, formatearPorcentaje, formatearUnidades } from "@/lib/formato";
 import type { ModoPrecio } from "@/domain/types";
 import { useCalculoStore } from "@/store/calculo-store";
 
@@ -340,13 +340,13 @@ function Resultados({
             </div>
             {analisis.puntoEquilibrioUnidades ? (
               <>
-                <p className="mt-1 text-3xl font-extrabold">{formatearCantidad(analisis.puntoEquilibrioUnidades)} unidades</p>
+                <p className="mt-1 text-3xl font-extrabold">{formatearUnidades(analisis.puntoEquilibrioUnidades)}</p>
                 <p className="mt-1 text-sm text-gray-200">Facturación mínima: {formatearMonto(analisis.facturacionMinima)}</p>
                 {sinCostosFijos ? null : (
                   <ComoSeCalcula
                     tono="oscuro"
                     formula="Costo fijo total ÷ contribución por unidad, redondeado hacia arriba (no se puede vender media unidad)"
-                    cuenta={`${formatearMonto(costoFijo)} ÷ ${formatearMonto(analisis.contribucion)} → ${formatearCantidad(analisis.puntoEquilibrioUnidades)} unidades`}
+                    cuenta={`${formatearMonto(costoFijo)} ÷ ${formatearMonto(analisis.contribucion)} → ${formatearUnidades(analisis.puntoEquilibrioUnidades)}`}
                   />
                 )}
               </>
@@ -377,7 +377,7 @@ function Resultados({
                 : "Necesitás aumentar el volumen o el precio para cubrir tus costos fijos."}
           </p>
         )}
-        {volumen ? <p className="sr-only">Producís {formatearCantidad(volumen)} unidades por mes.</p> : null}
+        {volumen ? <p className="sr-only">Producís {formatearUnidades(volumen)} por mes.</p> : null}
       </section>
 
       {/* En Figma el gráfico va a todo el ancho, debajo del punto de equilibrio. */}

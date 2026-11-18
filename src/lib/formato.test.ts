@@ -6,6 +6,7 @@ import {
   formatearDiferenciaPuntos,
   formatearDiferenciaUnidades,
   formatearMonto,
+  formatearUnidades,
   unirEnLista,
 } from "./formato";
 
@@ -59,6 +60,21 @@ describe("formatearCantidad", () => {
 
   it("inválido muestra un guion", () => {
     expect(formatearCantidad("")).toBe("—");
+  });
+});
+
+describe("formatearUnidades", () => {
+  it("usa singular solo cuando se muestra exactamente 1", () => {
+    expect(formatearUnidades("1")).toBe("1 unidad");
+    expect(formatearUnidades("34")).toBe("34 unidades");
+    expect(formatearUnidades("0")).toBe("0 unidades");
+    expect(formatearUnidades("1.5")).toBe("1,5 unidades");
+    expect(formatearUnidades("1200")).toBe("1.200 unidades");
+  });
+
+  it("vacío o inválido muestra solo el guion", () => {
+    expect(formatearUnidades("")).toBe("—");
+    expect(formatearUnidades(null)).toBe("—");
   });
 });
 
