@@ -91,8 +91,11 @@ export interface LineaDetalle {
 }
 
 export interface DetalleTrabajoPropio {
-  /** Ruta «reventa»: es el sueldo mensual directo y no hay horas ni lotes que mostrar. */
+  /** Ruta «reventa» con sueldo fijo: es el sueldo mensual directo y no hay horas ni lotes que mostrar. */
   sueldoDirecto: boolean;
+  /** Ruta «reventa» por horas al mes: horas al mes × valor por hora, sin multiplicar por el volumen. */
+  porHorasAlMes: boolean;
+  horasAlMes: DecimalString;
   horasPorLote: DecimalString;
   valorHora: DecimalString;
   lotes: DecimalString;
@@ -150,7 +153,9 @@ export function detalleDeCostos(calculo: EntradaResumen): DetalleCostos {
   const trabajoPropio =
     t.incluir && totalTrabajo.greaterThan(0)
       ? {
-          sueldoDirecto: calculo.configuracion.ruta === "reventa",
+          sueldoDirecto: calculo.configuracion.ruta === "reventa" && t.modoSueldo !== "horas",
+          porHorasAlMes: calculo.configuracion.ruta === "reventa" && t.modoSueldo === "horas",
+          horasAlMes: t.horasAlMes,
           horasPorLote: t.horasPorLote,
           valorHora: t.valorHora,
           lotes: calculo.configuracion.lotes,

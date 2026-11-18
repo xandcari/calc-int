@@ -134,6 +134,10 @@ function Resumen() {
                 <span>
                   {detalle.trabajoPropio.sueldoDirecto ? (
                     "Sueldo mensual esperado"
+                  ) : detalle.trabajoPropio.porHorasAlMes ? (
+                    <>
+                      {formatearCantidad(detalle.trabajoPropio.horasAlMes)} hs al mes × {formatearMonto(detalle.trabajoPropio.valorHora)}/h
+                    </>
                   ) : (
                     <>
                       {formatearCantidad(detalle.trabajoPropio.horasPorLote)} hs × {formatearMonto(detalle.trabajoPropio.valorHora)}/h ×{" "}

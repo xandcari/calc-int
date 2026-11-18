@@ -152,6 +152,35 @@ describe("esquemaCalculo: ruta de producción, sueldo e insumos por lote", () =>
     }
   });
 
+  it("un cliente viejo sin modo de sueldo ni horas al mes queda con sueldo fijo y horas vacías", () => {
+    const c = valido() as unknown as { trabajoPropio: Record<string, unknown> };
+    delete c.trabajoPropio.modoSueldo;
+    delete c.trabajoPropio.horasAlMes;
+    const r = esquemaCalculo.safeParse(c);
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.trabajoPropio.modoSueldo).toBe("fijo");
+      expect(r.data.trabajoPropio.horasAlMes).toBe("");
+    }
+  });
+
+  it("acepta el modo «horas» con horas al mes y rechaza un modo desconocido o horas inválidas", () => {
+    const ok = valido();
+    ok.trabajoPropio.modoSueldo = "horas";
+    ok.trabajoPropio.horasAlMes = "40";
+    expect(esquemaCalculo.safeParse(ok).success).toBe(true);
+
+    const modoMalo = valido() as unknown as { trabajoPropio: { modoSueldo: string } };
+    modoMalo.trabajoPropio.modoSueldo = "semanal";
+    expect(esquemaCalculo.safeParse(modoMalo).success).toBe(false);
+
+    for (const malo of ["-1", "abc", "1,5"]) {
+      const c = valido();
+      c.trabajoPropio.horasAlMes = malo;
+      expect(esquemaCalculo.safeParse(c).success, malo).toBe(false);
+    }
+  });
+
   it("el sueldo mensual no puede ser negativo ni tener formato inválido", () => {
     for (const malo of ["-1", "abc", "1,5"]) {
       const c = valido();

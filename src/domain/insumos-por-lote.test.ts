@@ -37,6 +37,8 @@ const trabajo = (parcial: Partial<TrabajoPropio>): TrabajoPropio => ({
   horasMensuales: "",
   valorHora: "",
   sueldoMensual: "",
+  modoSueldo: "fijo",
+  horasAlMes: "",
   ...parcial,
 });
 

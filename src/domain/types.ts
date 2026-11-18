@@ -127,6 +127,14 @@ export type CategoriaCosto = ConceptoCosto["categoria"];
 // 3. Trabajo propio
 // ─────────────────────────────────────────────
 
+/**
+ * Cómo define su sueldo quien revende (ruta «reventa»): un monto fijo por mes, o las horas que trabaja al mes
+ * por lo que vale cada hora. Las otras rutas no lo usan.
+ */
+export type ModoSueldo = "fijo" | "horas";
+
+export const MODOS_SUELDO: ModoSueldo[] = ["fijo", "horas"];
+
 export interface TrabajoPropio {
   /** Si el usuario decide incluir el valor de su tiempo en el costo. */
   incluir: boolean;
@@ -144,6 +152,13 @@ export interface TrabajoPropio {
    * elegida por el equipo): entra directo como costo fijo y no se multiplica por el volumen.
    */
   sueldoMensual: DecimalString;
+  /** Solo «reventa»: si el sueldo se carga como monto fijo o como horas al mes × valor por hora. */
+  modoSueldo: ModoSueldo;
+  /**
+   * Solo «reventa» con `modoSueldo: "horas"`: horas que trabaja por mes, cargadas directamente (no se multiplican
+   * por el volumen). El trabajo propio vale `horasAlMes × valorHora`.
+   */
+  horasAlMes: DecimalString;
 }
 
 // ─────────────────────────────────────────────
@@ -267,4 +282,6 @@ export const TRABAJO_PROPIO_INICIAL: TrabajoPropio = {
   horasMensuales: "",
   valorHora: "",
   sueldoMensual: "",
+  modoSueldo: "fijo",
+  horasAlMes: "",
 };

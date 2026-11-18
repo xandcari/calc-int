@@ -66,7 +66,7 @@ describe("calcularResumenCostos — caso de referencia de Data (100 remeras)", (
   const datos = calculo({
     configuracion: { ...CONFIGURACION_INICIAL, unidadesPorLote: "100", lotes: "1", volumenMensual: "100" },
     costosFijos: [fijo("Alquiler", "200000"), fijo("Internet", "30000")],
-    trabajoPropio: { incluir: true, horasPorLote: "70", horasMensuales: "70", valorHora: "1000", sueldoMensual: "" },
+    trabajoPropio: { incluir: true, horasPorLote: "70", horasMensuales: "70", valorHora: "1000", sueldoMensual: "", modoSueldo: "fijo", horasAlMes: "" },
     costosVariables: [variable("Tela", "3000"), variable("Estampa", "1500"), variable("Packaging", "500")],
   });
 
@@ -92,7 +92,7 @@ describe("calcularResumenCostos — caso del diseño (Figma, torta)", () => {
     configuracion: { ...CONFIGURACION_INICIAL, unidadesPorLote: "20", lotes: "6", volumenMensual: "120" },
     costosFijos: [fijo("Arriendo", "8000"), fijo("Servicios", "5000"), fijo("Internet", "2000")],
     costosIndirectos: [indirecto("Comisiones MercadoPago", "1200")],
-    trabajoPropio: { incluir: true, horasPorLote: "4", horasMensuales: "24", valorHora: "20000", sueldoMensual: "" },
+    trabajoPropio: { incluir: true, horasPorLote: "4", horasMensuales: "24", valorHora: "20000", sueldoMensual: "", modoSueldo: "fijo", horasAlMes: "" },
     costosVariables: [variable("Materia prima", "60"), variable("Empaque", "15"), variable("Etiqueta", "10")],
   });
 
@@ -121,7 +121,7 @@ describe("calcularResumenCostos — simulador de Backend (Simulador_App_Flujo.xl
   const c = calculo({
     configuracion: { ...CONFIGURACION_INICIAL, unidadesPorLote: "10", lotes: "30", volumenMensual: "300" },
     costosFijos: [fijo("Alquiler / Taller", "15000"), fijo("Servicios", "5000")],
-    trabajoPropio: { incluir: true, horasPorLote: "6", horasMensuales: "180", valorHora: "2000", sueldoMensual: "" },
+    trabajoPropio: { incluir: true, horasPorLote: "6", horasMensuales: "180", valorHora: "2000", sueldoMensual: "", modoSueldo: "fijo", horasAlMes: "" },
     costosIndirectos: [indirecto("Comisiones bancarias fijas", "1200")],
     costosVariables: [variable("Insumos", "60"), variable("Empaque", "15"), variable("Etiquetas", "10")],
   });
@@ -193,7 +193,7 @@ describe("calcularResumenCostos — bordes", () => {
   it("la ruta elegida decide qué datos de trabajo se miran: en «reventa» las horas viejas no cuentan", () => {
     const base = calculo({
       configuracion: { ...CONFIGURACION_INICIAL, ruta: "reventa", volumenMensual: "10" },
-      trabajoPropio: { incluir: true, horasPorLote: "abc", horasMensuales: "", valorHora: "", sueldoMensual: "1000" },
+      trabajoPropio: { incluir: true, horasPorLote: "abc", horasMensuales: "", valorHora: "", sueldoMensual: "1000", modoSueldo: "fijo", horasAlMes: "" },
     });
     expect(calcularResumenCostos(base).tieneImportesInvalidos).toBe(false);
     expect(
@@ -214,7 +214,7 @@ describe("calcularResumenCostos — bordes", () => {
 
   it("no suma el trabajo propio si el usuario no lo incluye", () => {
     const r = calcularResumenCostos(
-      calculo({ trabajoPropio: { incluir: false, horasPorLote: "4", horasMensuales: "24", valorHora: "100", sueldoMensual: "" } }),
+      calculo({ trabajoPropio: { incluir: false, horasPorLote: "4", horasMensuales: "24", valorHora: "100", sueldoMensual: "", modoSueldo: "fijo", horasAlMes: "" } }),
     );
     expect(r.totalTrabajoPropioMensual).toBe("0");
   });

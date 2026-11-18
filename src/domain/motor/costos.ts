@@ -56,14 +56,16 @@ type EntradaImportes = Pick<
 
 /**
  * Hay algún importe cargado que no es un número o es negativo. Mira solo los datos que usa la ruta elegida:
- * el sueldo en «reventa»; las horas y el valor por hora en las otras dos.
+ * el sueldo (o las horas al mes y el valor por hora) en «reventa»; las horas y el valor por hora en las otras dos.
  */
 export function hayImportesInvalidos(calculo: EntradaImportes): boolean {
   const { trabajoPropio, configuracion } = calculo;
   const delTrabajo =
-    configuracion.ruta === "reventa"
-      ? [trabajoPropio.sueldoMensual]
-      : [trabajoPropio.horasPorLote, trabajoPropio.valorHora];
+    configuracion.ruta !== "reventa"
+      ? [trabajoPropio.horasPorLote, trabajoPropio.valorHora]
+      : trabajoPropio.modoSueldo === "horas"
+        ? [trabajoPropio.horasAlMes, trabajoPropio.valorHora]
+        : [trabajoPropio.sueldoMensual];
   return [
     ...calculo.costosFijos.map((c) => c.monto),
     ...calculo.costosIndirectos.map((c) => c.monto),
@@ -171,13 +173,17 @@ type EntradaResumen = Pick<
  * Valor del tiempo propio por mes.
  * - «lotes» y «unidad»: horas mensuales × valor por hora.
  * - «reventa» (Alternativa 2 de Data): el sueldo mensual que quiere ganar, directo y sin multiplicar por el volumen.
+ *   Si elige «horas al mes»: horas al mes × valor por hora (tampoco se multiplica por el volumen).
  */
 export function trabajoPropioMensual(calculo: EntradaResumen): Decimal {
   const { trabajoPropio, configuracion } = calculo;
   if (!trabajoPropio.incluir) return CERO;
-  return configuracion.ruta === "reventa"
-    ? importeValido(trabajoPropio.sueldoMensual)
-    : importeValido(trabajoPropio.horasMensuales).times(importeValido(trabajoPropio.valorHora));
+  if (configuracion.ruta !== "reventa") {
+    return importeValido(trabajoPropio.horasMensuales).times(importeValido(trabajoPropio.valorHora));
+  }
+  return trabajoPropio.modoSueldo === "horas"
+    ? importeValido(trabajoPropio.horasAlMes).times(importeValido(trabajoPropio.valorHora))
+    : importeValido(trabajoPropio.sueldoMensual);
 }
 
 export function calcularResumenCostos(calculo: EntradaResumen): ResumenCostos {
