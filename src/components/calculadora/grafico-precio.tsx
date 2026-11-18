@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { Tarjeta } from "@/components/ui/tarjeta";
 import { useHidratado } from "@/hooks/use-hidratado";
 import { useAnalisisPrecio } from "@/hooks/use-analisis-precio";
-import { formatearCantidad, formatearMonto } from "@/lib/formato";
+import { formatearCantidad, formatearMonto, formatearUnidades } from "@/lib/formato";
 
 // Va a todo el ancho del paso «Precio» (diseño de Figma). El ancho se mide en pantalla para que
 // la letra quede siempre del mismo tamaño, también en el celular.
@@ -127,7 +127,7 @@ function Grafico({
   const piso = ALTO - MARGEN.abajo;
 
   const descripcion = hayCruce
-    ? `Gráfico de ingresos y costos totales según las unidades vendidas por mes. Las líneas se cruzan en ${formatearCantidad(equilibrio)} unidades.`
+    ? `Gráfico de ingresos y costos totales según las unidades vendidas por mes. Las líneas se cruzan en ${formatearUnidades(equilibrio)}.`
     : "Gráfico de ingresos y costos totales según las unidades vendidas por mes.";
 
   return (
@@ -255,9 +255,9 @@ function Grafico({
       </svg>
 
       <dl className="mt-4 grid gap-3 sm:grid-cols-3">
-        <Dato etiqueta="Equilibrio" valor={equilibrio ? `${formatearCantidad(equilibrio)} unidades` : "—"} />
+        <Dato etiqueta="Equilibrio" valor={equilibrio ? formatearUnidades(equilibrio) : "—"} />
         <Dato etiqueta="Facturación mínima" valor={formatearMonto(analisis.facturacionMinima)} />
-        <Dato etiqueta="Tu volumen" valor={volumen ? `${formatearCantidad(volumen)} unidades` : "—"} />
+        <Dato etiqueta="Tu volumen" valor={volumen ? formatearUnidades(volumen) : "—"} />
       </dl>
 
       <TablaDatos

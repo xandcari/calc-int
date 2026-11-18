@@ -16,7 +16,7 @@ import {
   type PartidaComposicion,
 } from "@/domain/motor/resumen";
 import { useHidratado } from "@/hooks/use-hidratado";
-import { formatearCantidad, formatearMonto, formatearPorcentaje } from "@/lib/formato";
+import { formatearCantidad, formatearMonto, formatearPorcentaje, formatearUnidades } from "@/lib/formato";
 import { useCalculoStore } from "@/store/calculo-store";
 
 function Esqueleto() {
@@ -204,7 +204,7 @@ function BloqueDetalle({ titulo, lineas }: { titulo: string; lineas: LineaDetall
               {l.nombre}
               {l.porLote ? (
                 <span className="block text-xs text-gray-500">
-                  {formatearMonto(l.porLote.montoLote)} por lote ÷ {formatearCantidad(l.porLote.unidadesPorLote)} unidades
+                  {formatearMonto(l.porLote.montoLote)} por lote ÷ {formatearUnidades(l.porLote.unidadesPorLote)}
                 </span>
               ) : null}
             </span>

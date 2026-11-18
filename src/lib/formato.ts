@@ -30,6 +30,13 @@ export function formatearCantidad(valor: string | null | undefined): string {
   return formateador.format(numero.toDecimalPlaces(2, Decimal.ROUND_HALF_UP).toNumber());
 }
 
+/** Cantidad seguida de «unidad» o «unidades» según lo que se muestra: "1" → "1 unidad"; "34" → "34 unidades"; vacío → "—". */
+export function formatearUnidades(valor: string | null | undefined): string {
+  const cantidad = formatearCantidad(valor);
+  if (cantidad === "—") return cantidad;
+  return `${cantidad} ${cantidad === "1" ? "unidad" : "unidades"}`;
+}
+
 /** Une elementos en una enumeración en castellano: ["a"] → "a"; ["a", "b"] → "a y b"; ["a", "b", "c"] → "a, b y c". */
 export function unirEnLista(elementos: string[]): string {
   if (elementos.length <= 1) return elementos.join("");

@@ -8,7 +8,7 @@ import { Tarjeta } from "@/components/ui/tarjeta";
 import type { ResumenCostos } from "@/domain/motor/costos";
 import type { AnalisisPrecio } from "@/domain/motor/precio";
 import type { Calculo } from "@/domain/types";
-import { formatearCantidad, formatearMonto, formatearPorcentaje } from "@/lib/formato";
+import { formatearCantidad, formatearMonto, formatearPorcentaje, formatearUnidades } from "@/lib/formato";
 
 /** Clase que, mientras se imprime, deja visible solo el resumen (ver `globals.css`). */
 const CLASE_IMPRIMIENDO = "imprimiendo-resumen";
@@ -47,7 +47,7 @@ export function ResumenFinal({ calculo, resumen, analisis }: PropsResumenFinal) 
       ? `Calculado con un margen esperado de ${formatearPorcentaje(precio.margenPct)}`
       : "Precio ingresado por vos";
   const equilibrio = analisis.puntoEquilibrioUnidades
-    ? `${formatearCantidad(analisis.puntoEquilibrioUnidades)} unidades`
+    ? formatearUnidades(analisis.puntoEquilibrioUnidades)
     : "No existe: el precio no cubre el costo variable";
 
   return (
