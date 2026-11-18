@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 import { Aviso } from "@/components/ui/aviso";
@@ -14,6 +15,7 @@ import { useCalculoStore } from "@/store/calculo-store";
  * Si el cálculo cargado es de otra persona, el servidor responde 403 y se muestra el mensaje.
  */
 export function BotonGuardar() {
+  const ruta = usePathname();
   const [guardando, setGuardando] = useState(false);
   const [resultado, setResultado] = useState<ResultadoGuardado | null>(null);
   // Si el cálculo ya está en la base, «Guardar» lo actualiza; esta bandera habilita además «guardar como nuevo».
@@ -46,8 +48,7 @@ export function BotonGuardar() {
       ) : resultado?.motivo === "sin_sesion" ? (
         <Aviso tono="advertencia" titulo="Necesitás iniciar sesión">
           Para guardar hace falta una cuenta.{" "}
-          {/* Provisorio: la única pantalla de login por ahora es la de prueba. Reemplazar por el login real. */}
-          <Link className="underline" href="/test_de_guardado">
+          <Link className="underline" href={`/cuenta?volver=${encodeURIComponent(ruta)}`}>
             Iniciar sesión o crear cuenta
           </Link>
           , y después volvé acá a guardar.

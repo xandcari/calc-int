@@ -1,17 +1,20 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 import { useSession } from "@/lib/auth-client";
 
 /**
  * Acceso a la cuenta en la parte superior derecha del recorrido.
  * Con sesión: muestra el nombre del usuario y lleva a «Mis cálculos». Sin sesión: invita a iniciar sesión.
- * Provisorio: ambos enlaces apuntan a las páginas de prueba (/test_de_usuario y /test_de_guardado);
- * cuando exista la interfaz real de cuenta, cambiar solo los `href`.
+ * «Iniciar sesión» lleva a /cuenta y, al terminar, vuelve a la pantalla donde estaba la persona.
+ * Provisorio: el enlace con sesión sigue apuntando a la página de prueba /test_de_usuario;
+ * cuando exista la interfaz real de «Mis cálculos», cambiar solo ese `href`.
  */
 export function MenuUsuario() {
   const { data: sesion, isPending } = useSession();
+  const ruta = usePathname();
   if (isPending) return null;
 
   const clases =
@@ -24,7 +27,7 @@ export function MenuUsuario() {
       {sesion.user.name || sesion.user.email}
     </Link>
   ) : (
-    <Link href="/test_de_guardado" className={clases}>
+    <Link href={`/cuenta?volver=${encodeURIComponent(ruta)}`} className={clases}>
       Iniciar sesión
     </Link>
   );
