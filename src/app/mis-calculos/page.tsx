@@ -6,6 +6,7 @@ import { ListaCalculos } from "@/components/mis-calculos/lista-calculos";
 export const metadata: Metadata = {
   title: "Mis cálculos — Preciar",
   description: "Volvé a ver, editá, compartí o borrá los cálculos que guardaste",
+  robots: { index: false, follow: false },
 };
 
 /** Pantalla «Mis cálculos»: la lista de cálculos guardados de la persona con sesión iniciada. */

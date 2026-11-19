@@ -7,6 +7,7 @@ import { rutaSegura } from "@/lib/ruta-segura";
 export const metadata: Metadata = {
   title: "Tu cuenta — Preciar",
   description: "Iniciá sesión o creá tu cuenta para guardar y compartir tus cálculos",
+  robots: { index: false, follow: false },
 };
 
 type Parametro = string | string[] | undefined;

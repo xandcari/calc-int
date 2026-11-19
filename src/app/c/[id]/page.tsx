@@ -7,6 +7,9 @@ import { esUuid } from "@/server/http";
 
 import { CargadorCompartido } from "./cargador";
 
+/** Los links compartidos son privados de quien los pasa: no deben aparecer en buscadores. */
+export const metadata = { robots: { index: false, follow: false } };
+
 /**
  * Entrada del link compartido: /c/<uuid>.
  * Lee el cálculo en el servidor y se lo pasa al cargador, que lo vuelca en el store y manda al usuario al recorrido.
