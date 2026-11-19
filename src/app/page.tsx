@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { AccesoCuenta } from "@/components/calculadora/acceso-cuenta";
 import { Logo, PieHome } from "@/components/calculadora/cabecera";
 import { BotonLink } from "@/components/ui/boton";
 
@@ -134,6 +135,11 @@ const PREGUNTAS = [
       "Porque tu trabajo también cuesta. Lo calculamos como un costo fijo mensual: las horas que le dedicás por la plata que querés ganar por hora.",
   },
   {
+    pregunta: "¿Para qué sirve crear una cuenta?",
+    respuesta:
+      "Para guardar tus cálculos y volver a verlos en «Mis cálculos», compartirlos con un link, descargar el informe detallado en PDF y retomarlos desde cualquier dispositivo. Es opcional: sin cuenta también podés calcular.",
+  },
+  {
     pregunta: "¿Qué pasa con los datos que cargo?",
     respuesta:
       "No hace falta registrarte. Tu borrador queda solo en tu navegador, y solo se guarda en una cuenta si vos elegís hacerlo. Si querés conservar tu cálculo, descargá el resumen en PDF o como imagen antes de reiniciar.",
@@ -187,9 +193,12 @@ function CabeceraHome() {
             ))}
           </ul>
         </nav>
-        <BotonLink href="/calculadora/producto" className="px-6">
-          Empezar mi cálculo
-        </BotonLink>
+        <div className="flex items-center gap-3 sm:gap-5">
+          <AccesoCuenta />
+          <BotonLink href="/calculadora/producto" className="px-4 sm:px-6">
+            Empezar mi cálculo
+          </BotonLink>
+        </div>
       </div>
     </header>
   );
@@ -217,6 +226,23 @@ export default function Home() {
                 Empezar mi cálculo
               </BotonLink>
               <p className="text-sm text-white">No necesitás cuenta. Tu borrador queda solo en tu navegador.</p>
+              <p className="text-sm text-white">
+                ¿Querés guardar tus cálculos?{" "}
+                <Link
+                  href="/cuenta?modo=crear"
+                  className="rounded font-semibold underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                >
+                  Creá tu cuenta
+                </Link>{" "}
+                o{" "}
+                <Link
+                  href="/cuenta"
+                  className="rounded font-semibold underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                >
+                  iniciá sesión
+                </Link>
+                .
+              </p>
             </div>
           </div>
         </section>
@@ -363,7 +389,7 @@ export default function Home() {
           </div>
         </section>
       </main>
-      <PieHome enlaces={SECCIONES} />
+      <PieHome enlaces={[...SECCIONES, { href: "/cuenta", texto: "Iniciar sesión" }, { href: "/cuenta?modo=crear", texto: "Crear cuenta" }]} />
     </>
   );
 }
