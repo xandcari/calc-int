@@ -9,8 +9,6 @@ import { useSession } from "@/lib/auth-client";
  * Acceso a la cuenta en la parte superior derecha del recorrido.
  * Con sesión: muestra el nombre del usuario y lleva a «Mis cálculos». Sin sesión: invita a iniciar sesión.
  * «Iniciar sesión» lleva a /cuenta y, al terminar, vuelve a la pantalla donde estaba la persona.
- * Provisorio: el enlace con sesión sigue apuntando a la página de prueba /test_de_usuario;
- * cuando exista la interfaz real de «Mis cálculos», cambiar solo ese `href`.
  */
 export function MenuUsuario() {
   const { data: sesion, isPending } = useSession();
@@ -22,7 +20,7 @@ export function MenuUsuario() {
     "focus-visible:outline-2 focus-visible:outline-primary-600";
 
   return sesion ? (
-    <Link href="/test_de_usuario" className={clases} title="Ver mis cálculos guardados">
+    <Link href="/mis-calculos" className={clases} title="Ver mis cálculos guardados">
       <span aria-hidden="true">👤 </span>
       {sesion.user.name || sesion.user.email}
     </Link>
