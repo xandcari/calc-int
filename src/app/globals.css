@@ -97,3 +97,73 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/* ==========================================================================
+   Opciones amigables (opcionales): solo se aplican con data-estilo="a|b|c" en <html>.
+   Sin estilo elegido nada de lo siguiente cambia la calculadora.
+   ========================================================================== */
+
+@keyframes opcion-tarjeta {
+  from { opacity: 0; transform: translateX(12px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes opcion-flotante {
+  from { opacity: 0; transform: translateY(12px) scale(0.92); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes opcion-sheet {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes opcion-escribe {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes opcion-aviso {
+  0% { opacity: 0; transform: translate(-50%, 12px); }
+  10%, 80% { opacity: 1; transform: translate(-50%, 0); }
+  100% { opacity: 0; transform: translate(-50%, 12px); visibility: hidden; }
+}
+
+.anim-tarjeta { animation: opcion-tarjeta 0.25s ease-out; }
+.anim-flotante { animation: opcion-flotante 0.3s ease-out; }
+.anim-sheet { animation: opcion-sheet 0.3s ease-out; }
+.anim-escribe { animation: opcion-escribe 0.4s ease-out both; }
+.anim-aviso { animation: opcion-aviso 4s ease-in-out forwards; }
+
+/* A · quien no se lleva bien con la tecnología: letra grande, buen contraste, poca información a la vista. */
+html[data-estilo="a"] { font-size: 112.5%; }
+html[data-estilo="a"] body { padding-bottom: calc(var(--guia-alto, 4rem) + 1rem); }
+html[data-estilo="a"] main .sticky[class*="bottom-0"] { bottom: var(--guia-alto, 0px); }
+html[data-estilo="a"] .text-gray-500 { color: var(--color-gray-800); }
+html[data-estilo="a"] .text-gray-700 { color: var(--color-gray-900); }
+html[data-estilo="a"] main :is(input:not([type="checkbox"], [type="radio"]), select, textarea) { min-height: 3.25rem; font-size: 1.125rem; }
+/* El panel «Resumen en vivo» se oculta salvo en el simulador (ahí trae «Descargar mi resumen»). */
+html[data-estilo="a"]:not([data-paso="5"]) div:has(> aside[aria-label="Resumen en vivo"]) { display: none; }
+html[data-estilo="a"]:not([data-paso="5"]) div:has(> main#contenido) { grid-template-columns: minmax(0, 1fr); max-width: 48rem; }
+
+/* B · cliente promedio: bordes más redondeados y botones tipo píldora. */
+html[data-estilo="b"] main :is(input:not([type="checkbox"], [type="radio"]), select, textarea) { border-radius: 0.875rem; }
+html[data-estilo="b"] main :is(button, a)[class*="bg-primary-900"] { border-radius: 9999px; }
+html[data-estilo="b"] aside[aria-label="Resumen en vivo"] { border-radius: 1.5rem; }
+
+/* C · cliente exigente: más denso, más ancho, con espacio para la barra de indicadores. */
+html[data-estilo="c"] { font-size: 93.75%; }
+html[data-estilo="c"] body { padding-bottom: 5rem; }
+/* La barra «Atrás / Siguiente» queda por encima de la barra de indicadores. */
+html[data-estilo="c"] main .sticky[class*="bottom-0"] { bottom: 4.25rem; }
+html[data-estilo="c"] div:has(> main#contenido) { max-width: 80rem; gap: 1.25rem; padding-top: 1.5rem; padding-bottom: 1.5rem; }
+
+/* Tablets y pantallas medianas: letra grande en A, pero sin desbordar la cabecera con los pasos. */
+@media (width < 64rem) {
+  html[data-estilo="a"] { font-size: 106.25%; }
+}
+
+/* Barra «Versión:» (solo para comparar): deja lugar arriba. */
+html[data-selector] body { padding-top: 2rem; }
+
+/* C: el botón «¿Te ayudo?» y su ventana quedan por encima de la barra de indicadores y de «Atrás / Siguiente». */
+html[data-estilo="c"] .fab-ayuda { bottom: 9.5rem; }
+@media (width >= 40rem) {
+  html[data-estilo="c"] .sheet-ayuda { bottom: 13rem; max-height: calc(100dvh - 15rem); }
+}
