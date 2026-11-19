@@ -79,3 +79,21 @@ body {
     box-shadow: none;
   }
 }
+
+/* Foco visible en todo elemento interactivo (teclado), con un anillo que se ve sobre fondo claro y oscuro. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-primary-600);
+  outline-offset: 2px;
+}
+
+/* Quien pidió menos movimiento en su sistema no ve transiciones ni animaciones. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -4,7 +4,7 @@ import type { ComponentProps } from "react";
 type Variante = "primario" | "secundario" | "peligro" | "celeste";
 
 const BASE =
-  "inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-colors " +
+  "inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-colors " +
   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700 " +
   "disabled:cursor-not-allowed disabled:opacity-50";
 
