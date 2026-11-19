@@ -119,6 +119,10 @@ body {
   from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: none; }
 }
+@keyframes opcion-globo {
+  from { opacity: 0; transform: translateY(8px) scale(0.95); }
+  to { opacity: 1; transform: none; }
+}
 @keyframes opcion-aviso {
   0% { opacity: 0; transform: translate(-50%, 12px); }
   10%, 80% { opacity: 1; transform: translate(-50%, 0); }
@@ -129,6 +133,7 @@ body {
 .anim-flotante { animation: opcion-flotante 0.3s ease-out; }
 .anim-sheet { animation: opcion-sheet 0.3s ease-out; }
 .anim-escribe { animation: opcion-escribe 0.4s ease-out both; }
+.anim-globo { animation: opcion-globo 0.2s ease-out; }
 .anim-aviso { animation: opcion-aviso 4s ease-in-out forwards; }
 
 /* A · quien no se lleva bien con la tecnología: letra grande, buen contraste, poca información a la vista. */
@@ -167,3 +172,6 @@ html[data-estilo="c"] .fab-ayuda { bottom: 9.5rem; }
 @media (width >= 40rem) {
   html[data-estilo="c"] .sheet-ayuda { bottom: 13rem; max-height: calc(100dvh - 15rem); }
 }
+
+/* A y B: las palabras que se explican al pasar el cursor van con subrayado punteado. */
+::highlight(glosario) { text-decoration: underline dotted; text-underline-offset: 0.2em; }

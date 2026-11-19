@@ -7,6 +7,7 @@ import { guiaDe, marcarBienvenidaVista, useBienvenidaVista, useEstilo } from "@/
 
 import { AvisoAvance } from "./aviso-avance";
 import { Bienvenida } from "./bienvenida";
+import { GlosarioHover } from "./glosario-hover";
 import { GuiaConversacional } from "./guia-conversacional";
 import { PanelDatos } from "./panel-datos";
 import { SelectorEstilo } from "./selector-estilo";
@@ -38,6 +39,7 @@ export function OpcionesAmigables() {
   return (
     <>
       <SelectorEstilo />
+      {estilo === "a" || estilo === "b" ? <GlosarioHover /> : null}
       {guia && estilo === "a" ? <GuiaConversacional key={ruta} guia={guia} /> : null}
       {guia && estilo === "b" ? (
         <>

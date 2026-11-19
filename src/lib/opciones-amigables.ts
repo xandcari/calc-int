@@ -214,3 +214,17 @@ export const BIENVENIDA: { icono: string; titulo: string; texto: string }[] = [
   { icono: "📝", titulo: "Anotás lo que gastás", texto: "Materiales, alquiler, tu tiempo. No hace falta que sea exacto: después lo ajustás." },
   { icono: "💡", titulo: "Te mostramos tu precio", texto: "Ves cuánto ganás y qué pasa si cambiás algo, y te guardás el resumen." },
 ];
+
+/* ---------- Glosario para el cursor (versiones A y B) ---------- */
+
+/** Palabras difíciles con su explicación en simple. Salen de la guía y se suman algunas que aparecen en las pantallas. */
+export const GLOSARIO: PalabraSimple[] = [
+  ...GUIA.flatMap((g) => g.palabras),
+  { palabra: "Costo unitario", significa: "Todo lo que te cuesta tener una unidad lista para vender." },
+  { palabra: "Gastos fijos", significa: "Lo que pagás todos los meses, vendas o no vendas. Por ejemplo, el alquiler o internet." },
+  { palabra: "Variables", significa: "Lo que gastás por cada cosa que vendés. Por ejemplo, los materiales o la bolsita." },
+  { palabra: "Tu tiempo", significa: "Tu tiempo también cuesta: poné cuánto querés ganar por cada hora que trabajás." },
+  { palabra: "Indirectos", significa: "Gastos que sirven para todo tu negocio y no a un producto en particular, como la luz o el contador." },
+  { palabra: "Volumen", significa: "Cuántas unidades hacés o vendés en un mes." },
+  { palabra: "Desglose", significa: "El detalle de a qué se va cada parte del costo." },
+];
