@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 
 import { BotonGuardar } from "@/components/calculadora/boton-guardar";
 import { ComparacionEscenarios, type EscenarioConResultado } from "@/components/calculadora/comparacion-escenarios";
@@ -37,6 +37,16 @@ function Esqueleto() {
   );
 }
 
+/** Un campo vacío cuenta como «sin cambio» al simular. */
+const comoPct = (valor: string) => (valor.trim() === "" ? "0" : valor);
+
+/** Deja el valor escrito dentro del rango permitido. Vacío o inválido pasa a «0». */
+function limitarPct(valor: string): string {
+  const n = Number(valor);
+  if (valor.trim() === "" || Number.isNaN(n)) return "0";
+  return String(Math.min(Math.max(n, VARIACION_MINIMA_PCT), VARIACION_MAXIMA_PCT));
+}
+
 /** Paso 5 — «Simulador de escenarios» (Vista 5 del diseño). */
 export function VistaSimulador() {
   const hidratado = useHidratado();
@@ -50,6 +60,7 @@ function Simulador() {
   const eliminarEscenario = useCalculoStore((s) => s.eliminarEscenario);
   const { calculo, resumen, precio, analisis } = useAnalisisPrecio();
   const [idAEliminar, setIdAEliminar] = useState<string | null>(null);
+  const [idActivo, setIdActivo] = useState<string | null>(null);
 
   const base = precio ? situacionBase(calculo, precio) : null;
 
@@ -68,7 +79,11 @@ function Simulador() {
   const resultados = new Map(
     escenarios.map((e) => [
       e.id,
-      simularVariaciones(calculo, precio, { insumosPct: e.insumosPct, precioPct: e.precioPct, produccionPct: e.produccionPct }),
+      simularVariaciones(calculo, precio, {
+        insumosPct: comoPct(e.insumosPct),
+        precioPct: comoPct(e.precioPct),
+        produccionPct: comoPct(e.produccionPct),
+      }),
     ]),
   );
   const paraComparar: EscenarioConResultado[] = escenarios.flatMap((escenario) => {
@@ -77,6 +92,16 @@ function Simulador() {
   });
   const llegoAlMaximo = escenarios.length >= MAX_ESCENARIOS;
   const escenarioAEliminar = escenarios.find((e) => e.id === idAEliminar) ?? null;
+  // Se muestra un escenario a la vez: el elegido, o el primero si el elegido ya no existe (por ejemplo, se eliminó).
+  const escenarioActivo = escenarios.find((e) => e.id === idActivo) ?? escenarios[0] ?? null;
+
+  /** Ejecuta la acción (agregar o duplicar) y pasa a la pestaña del escenario que quedó nuevo. */
+  function conNuevoActivo(accion: () => void) {
+    const antes = new Set(useCalculoStore.getState().calculo.escenarios.map((e) => e.id));
+    accion();
+    const nuevo = useCalculoStore.getState().calculo.escenarios.find((e) => !antes.has(e.id));
+    if (nuevo) setIdActivo(nuevo.id);
+  }
   const producto = calculo.configuracion.nombre.trim();
 
   return (
@@ -107,40 +132,54 @@ function Simulador() {
         </dl>
       </section>
 
-      {escenarios.length === 0 ? (
-        <Aviso tono="consejo">No tenés escenarios. Agregá uno para empezar a comparar.</Aviso>
+      {escenarioActivo === null ? (
+        <>
+          <Aviso tono="consejo">No tenés escenarios. Agregá uno para empezar a comparar.</Aviso>
+          <BotonAgregar llegoAlMaximo={llegoAlMaximo} onAgregar={() => conNuevoActivo(agregarEscenario)} />
+        </>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2">
-          {escenarios.map((escenario) => (
+        <section aria-labelledby="escenarios" className="flex flex-col gap-4">
+          <h2 id="escenarios" className="text-xs font-bold uppercase tracking-widest text-gray-900">
+            Tus escenarios
+          </h2>
+          <PestanasEscenarios
+            escenarios={escenarios}
+            idActivo={escenarioActivo.id}
+            onElegir={setIdActivo}
+            onAgregar={() => conNuevoActivo(agregarEscenario)}
+            llegoAlMaximo={llegoAlMaximo}
+          />
+          <div role="tabpanel" id={`panel-${escenarioActivo.id}`} aria-labelledby={`pestana-${escenarioActivo.id}`}>
             <TarjetaEscenario
-              key={escenario.id}
-              escenario={escenario}
+              key={escenarioActivo.id}
+              escenario={escenarioActivo}
               base={base}
-              resultado={resultados.get(escenario.id) ?? null}
+              resultado={resultados.get(escenarioActivo.id) ?? null}
               puedeDuplicar={!llegoAlMaximo}
-              onCambiar={(cambios) => actualizarEscenario(escenario.id, cambios)}
-              onDuplicar={() => duplicarEscenario(escenario.id)}
-              onEliminar={() => setIdAEliminar(escenario.id)}
+              onCambiar={(cambios) => actualizarEscenario(escenarioActivo.id, cambios)}
+              onDuplicar={() => conNuevoActivo(() => duplicarEscenario(escenarioActivo.id))}
+              onEliminar={() => setIdAEliminar(escenarioActivo.id)}
             />
-          ))}
-        </div>
+          </div>
+          {llegoAlMaximo ? (
+            <p className="text-sm text-gray-700">Llegaste al máximo de {MAX_ESCENARIOS} escenarios.</p>
+          ) : null}
+        </section>
       )}
 
-      <div className="flex flex-col gap-2">
-        <button
-          type="button"
-          onClick={() => agregarEscenario()}
-          disabled={llegoAlMaximo}
-          className="min-h-11 w-full rounded-xl border border-dashed border-gray-400 bg-transparent px-5 py-3 text-sm font-medium text-gray-900 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          + Agregar escenario
-        </button>
-        {llegoAlMaximo ? (
-          <p className="text-sm text-gray-500">Llegaste al máximo de {MAX_ESCENARIOS} escenarios.</p>
-        ) : null}
-      </div>
-
-      <ComparacionEscenarios base={base} escenarios={paraComparar} />
+      {paraComparar.length > 1 ? (
+        <details className="group rounded-2xl border border-gray-200 bg-white shadow-sm">
+          <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 rounded-2xl px-6 py-4 text-base font-semibold text-gray-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700 [&::-webkit-details-marker]:hidden">
+            Comparar todos mis escenarios
+            <span aria-hidden="true" className="text-gray-700 transition-transform group-open:rotate-180">
+              ▾
+            </span>
+          </summary>
+          <div className="border-t border-gray-200 p-4 sm:p-6">
+            <ComparacionEscenarios base={base} escenarios={paraComparar} />
+          </div>
+        </details>
+      ) : null}
 
       {/*
         Resumen final (lo armó xandcari): ya no se ve en la pantalla, porque en Figma se descarga desde el panel
@@ -194,6 +233,89 @@ function Simulador() {
           setIdAEliminar(null);
         }}
       />
+    </div>
+  );
+}
+
+function BotonAgregar({ llegoAlMaximo, onAgregar }: { llegoAlMaximo: boolean; onAgregar: () => void }) {
+  return (
+    <div className="flex flex-col gap-2">
+      <button
+        type="button"
+        onClick={onAgregar}
+        disabled={llegoAlMaximo}
+        className="min-h-11 w-full rounded-xl border border-dashed border-gray-400 bg-transparent px-5 py-3 text-sm font-medium text-gray-900 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        + Agregar escenario
+      </button>
+      {llegoAlMaximo ? <p className="text-sm text-gray-700">Llegaste al máximo de {MAX_ESCENARIOS} escenarios.</p> : null}
+    </div>
+  );
+}
+
+/** Pestañas (una por escenario). Flechas ← → mueven entre ellas, como en un tablist estándar. */
+function PestanasEscenarios({
+  escenarios,
+  idActivo,
+  onElegir,
+  onAgregar,
+  llegoAlMaximo,
+}: {
+  escenarios: EscenarioUsuario[];
+  idActivo: string;
+  onElegir: (id: string) => void;
+  onAgregar: () => void;
+  llegoAlMaximo: boolean;
+}) {
+  const lista = useRef<HTMLDivElement>(null);
+
+  function alTeclear(e: KeyboardEvent<HTMLDivElement>) {
+    const indice = escenarios.findIndex((x) => x.id === idActivo);
+    let destino = indice;
+    if (e.key === "ArrowRight") destino = (indice + 1) % escenarios.length;
+    else if (e.key === "ArrowLeft") destino = (indice - 1 + escenarios.length) % escenarios.length;
+    else if (e.key === "Home") destino = 0;
+    else if (e.key === "End") destino = escenarios.length - 1;
+    else return;
+    e.preventDefault();
+    onElegir(escenarios[destino].id);
+    lista.current?.querySelector<HTMLElement>(`[id="pestana-${escenarios[destino].id}"]`)?.focus();
+  }
+
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <div ref={lista} role="tablist" aria-label="Escenarios" onKeyDown={alTeclear} className="flex flex-wrap gap-2">
+        {escenarios.map((e) => {
+          const activa = e.id === idActivo;
+          return (
+            <button
+              key={e.id}
+              id={`pestana-${e.id}`}
+              type="button"
+              role="tab"
+              aria-selected={activa}
+              aria-controls={`panel-${e.id}`}
+              tabIndex={activa ? 0 : -1}
+              onClick={() => onElegir(e.id)}
+              className={`min-h-11 max-w-48 truncate rounded-xl border px-4 py-2 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700 ${
+                activa
+                  ? "border-primary-900 bg-primary-900 text-white"
+                  : "border-gray-400 bg-white text-gray-900 hover:bg-gray-50"
+              }`}
+            >
+              {e.nombre.trim() || "Sin nombre"}
+            </button>
+          );
+        })}
+      </div>
+      <button
+        type="button"
+        onClick={onAgregar}
+        disabled={llegoAlMaximo}
+        className="min-h-11 rounded-xl border border-dashed border-gray-400 bg-transparent px-4 py-2 text-sm font-medium text-gray-900 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        + Agregar escenario
+      </button>
     </div>
   );
 }
@@ -295,19 +417,19 @@ function TarjetaEscenario({
       <div className="flex flex-col gap-3">
         <ControlVariacion
           id={`insumos-${escenario.id}`}
-          etiqueta="Variación en costos variables"
+          etiqueta="¿Cuánto cambian tus costos por unidad? (insumos, envases)"
           valor={escenario.insumosPct}
           onCambiar={(v) => onCambiar({ insumosPct: v })}
         />
         <ControlVariacion
           id={`precio-${escenario.id}`}
-          etiqueta="Variación en precio de venta"
+          etiqueta="¿Cuánto cambia tu precio de venta?"
           valor={escenario.precioPct}
           onCambiar={(v) => onCambiar({ precioPct: v })}
         />
         <ControlVariacion
           id={`produccion-${escenario.id}`}
-          etiqueta="Variación en volumen de producción"
+          etiqueta="¿Cuánto cambia la cantidad que producís?"
           valor={escenario.produccionPct}
           onCambiar={(v) => onCambiar({ produccionPct: v })}
         />
@@ -338,19 +460,36 @@ function ControlVariacion({
   valor: string;
   onCambiar: (valor: string) => void;
 }) {
-  const numero = Number(valor);
+  const numero = Number(valor) || 0;
   const signo = numero > 0 ? "+" : "";
 
   return (
     <div>
-      <div className="flex items-baseline justify-between gap-2 text-sm">
+      <div className="flex items-center justify-between gap-2 text-sm">
         <label htmlFor={id} className="text-gray-700">
           {etiqueta}
         </label>
-        {/* En Figma, sin cambio se ve «–»; con cambio, el porcentaje con signo. */}
-        <output htmlFor={id} className="font-semibold text-gray-900">
-          {numero === 0 ? "–" : `${signo}${numero}%`}
-        </output>
+        {/* Se puede escribir el porcentaje exacto o mover la barra; al salir del campo se ajusta al rango permitido. */}
+        <div className="flex items-center gap-1">
+          <input
+            type="number"
+            inputMode="decimal"
+            aria-label={`${etiqueta}, valor exacto en porcentaje`}
+            min={VARIACION_MINIMA_PCT}
+            max={VARIACION_MAXIMA_PCT}
+            step={1}
+            value={valor}
+            onChange={(e) => onCambiar(e.target.value)}
+            onBlur={() => {
+              const limpio = limitarPct(valor);
+              if (limpio !== valor) onCambiar(limpio);
+            }}
+            className="w-20 rounded-lg border border-gray-500 px-2 py-1 text-right font-semibold text-gray-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
+          />
+          <span aria-hidden="true" className="font-semibold text-gray-900">
+            %
+          </span>
+        </div>
       </div>
       <input
         id={id}
@@ -386,20 +525,32 @@ const METRICAS: { id: IndicadorId; etiqueta: string; unidad: "monto" | "unidades
   { id: "gananciaMensual", etiqueta: "Ganancia mensual", unidad: "monto", valor: (r) => formatearMonto(r.gananciaMensual) },
 ];
 
+/** Indicadores que se ven siempre; el resto queda bajo «Ver todos los indicadores». */
+const METRICAS_PRINCIPALES: IndicadorId[] = ["gananciaMensual", "puntoEquilibrio", "costoUnitario"];
+
 function Resultado({ base, resultado }: { base: Situacion; resultado: ResultadoEscenario }) {
   // La misma comparación que usa la tabla (motor): la tarjeta y la tabla nunca dicen cosas distintas.
   const comparacion = compararConBase(base, resultado);
+  const principales = METRICAS_PRINCIPALES.flatMap((id) => METRICAS.filter((m) => m.id === id));
+  const otras = METRICAS.filter((m) => !METRICAS_PRINCIPALES.includes(m.id));
+  const tarjeta = (m: (typeof METRICAS)[number]) => (
+    <div key={m.id} className="rounded-xl bg-gray-100 p-3">
+      <dt className="text-xs text-gray-700">{m.etiqueta}</dt>
+      <dd className="mt-1 text-base font-bold text-gray-900">{m.valor(resultado)}</dd>
+      <dd>
+        <IndicadorCambio cambio={comparacion[m.id]} unidad={m.unidad} nombre={m.etiqueta} />
+      </dd>
+    </div>
+  );
   return (
-    <dl aria-live="polite" className="grid grid-cols-2 gap-2">
-      {METRICAS.map((m) => (
-        <div key={m.id} className="rounded-xl bg-gray-100 p-3">
-          <dt className="text-xs text-gray-700">{m.etiqueta}</dt>
-          <dd className="mt-1 text-base font-bold text-gray-900">{m.valor(resultado)}</dd>
-          <dd>
-            <IndicadorCambio cambio={comparacion[m.id]} unidad={m.unidad} nombre={m.etiqueta} />
-          </dd>
-        </div>
-      ))}
-    </dl>
+    <div aria-live="polite" className="flex flex-col gap-2">
+      <dl className="grid grid-cols-1 gap-2 sm:grid-cols-3">{principales.map(tarjeta)}</dl>
+      <details>
+        <summary className="min-h-11 cursor-pointer py-2 text-sm font-semibold text-primary-700 underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-primary-700">
+          Ver todos los indicadores
+        </summary>
+        <dl className="mt-2 grid grid-cols-2 gap-2">{otras.map(tarjeta)}</dl>
+      </details>
+    </div>
   );
 }
