@@ -128,6 +128,24 @@ body {
   10%, 80% { opacity: 1; transform: translate(-50%, 0); }
   100% { opacity: 0; transform: translate(-50%, 12px); visibility: hidden; }
 }
+@keyframes opcion-guia-entra {
+  from { opacity: 0; transform: translateX(28px) scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes opcion-guia-sale {
+  from { opacity: 1; transform: none; }
+  to { opacity: 0; transform: translateX(28px) scale(0.96); }
+}
+/* Destello: un halo que se enciende y se apaga, y un barrido de luz que cruza la tarjeta. */
+@keyframes opcion-destello {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-accent-400) 0%, transparent); }
+  35% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--color-accent-400) 45%, transparent), 0 0 26px color-mix(in srgb, var(--color-accent-400) 70%, transparent); }
+  100% { box-shadow: 0 10px 25px -5px rgba(16, 27, 59, 0.2); }
+}
+@keyframes opcion-barrido {
+  from { transform: translateX(-130%) skewX(-18deg); }
+  to { transform: translateX(420%) skewX(-18deg); }
+}
 
 .anim-tarjeta { animation: opcion-tarjeta 0.25s ease-out; }
 .anim-flotante { animation: opcion-flotante 0.3s ease-out; }
@@ -135,11 +153,23 @@ body {
 .anim-escribe { animation: opcion-escribe 0.4s ease-out both; }
 .anim-globo { animation: opcion-globo 0.2s ease-out; }
 .anim-aviso { animation: opcion-aviso 4s ease-in-out forwards; }
+.anim-guia { animation: opcion-sheet 0.3s ease-out, opcion-destello 1.4s ease-out 0.15s; }
+.anim-guia-sale { animation: opcion-guia-sale 0.25s ease-in forwards; }
+.anim-barrido { animation: opcion-barrido 1.1s ease-out 0.2s both; }
+@media (min-width: 48rem) {
+  .anim-guia { animation: opcion-guia-entra 0.35s ease-out, opcion-destello 1.4s ease-out 0.15s; }
+}
 
 /* A · quien no se lleva bien con la tecnología: letra grande, buen contraste, poca información a la vista. */
 html[data-estilo="a"] { font-size: 112.5%; }
 html[data-estilo="a"] body { padding-bottom: calc(var(--guia-alto, 4rem) + 1rem); }
 html[data-estilo="a"] main .sticky[class*="bottom-0"] { bottom: var(--guia-alto, 0px); }
+/* La guía queda de costado (tarjeta a la derecha) para no tapar lo que se está completando. */
+@media (min-width: 48rem) {
+  html[data-estilo="a"] body { padding-bottom: 1rem; transition: padding-right 0.3s ease; }
+  html[data-estilo="a"][data-guia="abierta"] body { padding-right: 21.5rem; }
+  html[data-estilo="a"] main .sticky[class*="bottom-0"] { bottom: 0; }
+}
 html[data-estilo="a"] .text-gray-500 { color: var(--color-gray-800); }
 html[data-estilo="a"] .text-gray-700 { color: var(--color-gray-900); }
 html[data-estilo="a"] main :is(input:not([type="checkbox"], [type="radio"]), select, textarea) { min-height: 3.25rem; font-size: 1.125rem; }

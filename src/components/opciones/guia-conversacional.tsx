@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { TOTAL_PASOS, type GuiaPaso } from "@/lib/opciones-amigables";
 
 /**
- * Opción A (para quien no se lleva bien con la tecnología): una guía que habla en una burbuja fija abajo.
+ * Opción A (para quien no se lleva bien con la tecnología): una guía que habla en una tarjeta fija: abajo en el celular y de costado en pantallas más grandes.
  * Dice una sola cosa por vez y explica las palabras difíciles cuando la persona pasa el cursor por encima (o las toca).
  * Se pide con `key={ruta}` para que arranque de cero en cada paso.
  */
@@ -15,6 +15,19 @@ export function GuiaConversacional({ guia }: { guia: GuiaPaso }) {
   // En pantallas chicas la guía arranca resumida (una frase) y se abre con «Ver más».
   const [detalle, setDetalle] = useState(false);
   const caja = useRef<HTMLElement>(null);
+  // Al minimizar la guía se desvanece antes de irse.
+  const [saliendo, setSaliendo] = useState(false);
+  const temporizadorSalida = useRef<number>(0);
+
+  useEffect(() => () => window.clearTimeout(temporizadorSalida.current), []);
+
+  function minimizar() {
+    setSaliendo(true);
+    temporizadorSalida.current = window.setTimeout(() => {
+      setAbierta(false);
+      setSaliendo(false);
+    }, 250);
+  }
 
   // Con un toque la explicación queda unos segundos y se va sola (en pantallas táctiles no hay «salir con el cursor»).
   useEffect(() => {
@@ -29,8 +42,10 @@ export function GuiaConversacional({ guia }: { guia: GuiaPaso }) {
     const el = caja.current;
     if (!abierta || !el) {
       raiz.style.removeProperty("--guia-alto");
+      delete raiz.dataset.guia;
       return;
     }
+    raiz.dataset.guia = "abierta";
     const medir = () => raiz.style.setProperty("--guia-alto", `${el.offsetHeight + 12}px`);
     medir();
     const observador = new ResizeObserver(medir);
@@ -38,6 +53,7 @@ export function GuiaConversacional({ guia }: { guia: GuiaPaso }) {
     return () => {
       observador.disconnect();
       raiz.style.removeProperty("--guia-alto");
+      delete raiz.dataset.guia;
     };
   }, [abierta]);
 
@@ -58,9 +74,12 @@ export function GuiaConversacional({ guia }: { guia: GuiaPaso }) {
     <aside
       ref={caja}
       aria-label="Guía del paso"
-      className="anim-sheet fixed inset-x-3 bottom-3 z-40 mx-auto flex max-w-2xl gap-3 rounded-3xl border-2 border-primary-700 bg-white p-3 shadow-2xl sm:p-4 print:hidden"
+      className={`${saliendo ? "anim-guia-sale" : "anim-guia"} fixed inset-x-3 bottom-3 z-40 mx-auto flex max-w-2xl gap-3 rounded-3xl border-2 border-primary-700 bg-white p-3 shadow-2xl sm:p-4 md:inset-x-auto md:right-3 md:mx-0 md:w-80 md:max-w-none print:hidden`}
     >
-      <div aria-hidden="true" className="flex size-14 shrink-0 items-center justify-center rounded-full bg-primary-900 text-3xl">
+      <span aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden rounded-3xl">
+        <span className="anim-barrido absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-transparent via-accent-400/35 to-transparent" />
+      </span>
+      <div aria-hidden="true" className="flex size-14 shrink-0 items-center justify-center rounded-full bg-primary-900 text-3xl md:size-11 md:text-2xl">
         🙂
       </div>
       <div className="min-w-0 flex-1" aria-live="polite">
@@ -99,7 +118,7 @@ export function GuiaConversacional({ guia }: { guia: GuiaPaso }) {
                     <span
                       id={`glosario-${p.palabra}`}
                       role="tooltip"
-                      className={`pointer-events-none absolute bottom-full left-0 z-10 mb-2 w-72 max-w-[80vw] origin-bottom-left rounded-2xl border-2 border-primary-700 bg-primary-50 p-3 text-lg leading-snug text-primary-900 shadow-xl transition-[opacity,transform,visibility] duration-200 ease-out group-hover:visible group-hover:translate-y-0 group-hover:scale-100 group-hover:opacity-100 group-has-[:focus-visible]:visible group-has-[:focus-visible]:translate-y-0 group-has-[:focus-visible]:scale-100 group-has-[:focus-visible]:opacity-100 ${
+                      className={`pointer-events-none absolute bottom-full left-0 z-10 mb-2 w-72 max-w-[80vw] origin-bottom-left md:left-auto md:right-0 md:w-64 md:origin-bottom-right rounded-2xl border-2 border-primary-700 bg-primary-50 p-3 text-lg leading-snug text-primary-900 shadow-xl transition-[opacity,transform,visibility] duration-200 ease-out group-hover:visible group-hover:translate-y-0 group-hover:scale-100 group-hover:opacity-100 group-has-[:focus-visible]:visible group-has-[:focus-visible]:translate-y-0 group-has-[:focus-visible]:scale-100 group-has-[:focus-visible]:opacity-100 ${
                         fija ? "visible translate-y-0 scale-100 opacity-100" : "invisible translate-y-2 scale-95 opacity-0"
                       }`}
                     >
@@ -123,9 +142,9 @@ export function GuiaConversacional({ guia }: { guia: GuiaPaso }) {
       </div>
       <button
         type="button"
-        onClick={() => setAbierta(false)}
+        onClick={minimizar}
         aria-label="Minimizar la guía"
-        className="inline-flex size-12 shrink-0 items-center justify-center self-start rounded-full text-xl text-gray-700 hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-primary-700"
+        className="inline-flex size-12 shrink-0 items-center justify-center self-start rounded-full text-xl md:size-11 text-gray-700 hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-primary-700"
       >
         ✕
       </button>
