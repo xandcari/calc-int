@@ -54,6 +54,8 @@ function BotonReiniciar({ alReiniciar }: { alReiniciar: () => void }) {
         icono={<span className="text-lg leading-none">↻</span>}
         onCancelar={() => setConfirmando(false)}
         onConfirmar={() => {
+          // Cierra el diálogo primero: si ya se está en el paso 1 la ruta no cambia y, sin esto, quedaba abierto.
+          setConfirmando(false);
           reiniciar();
           alReiniciar();
           router.push("/calculadora/producto");
