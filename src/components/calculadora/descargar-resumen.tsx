@@ -176,11 +176,7 @@ export function DescargarResumen({ producto }: { producto: string }) {
       <DialogoConfirmar
         abierto={confirmando}
         titulo="Guardá el resumen de tu cálculo"
-        descripcion={
-          logueado
-            ? "Se descarga el informe detallado en PDF, con tus escenarios y todos los valores."
-            : "Vas a poder guardarlo como PDF desde la ventana de impresión."
-        }
+        descripcion="Se genera el PDF de tu resumen. Si se abre la ventana de impresión, elegí «Guardar como PDF»."
         etiquetaConfirmar="Descargar"
         tonoConfirmar="primario"
         icono={iconoDescarga}
