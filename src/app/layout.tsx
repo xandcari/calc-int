@@ -15,7 +15,6 @@ export const metadata: Metadata = {
   title: "Preciar — Costos y precios claros",
   description: DESCRIPCION_SITIO,
   applicationName: NOMBRE_SITIO,
-  alternates: { canonical: "/" },
   openGraph: {
     type: "website",
     locale: "es_AR",

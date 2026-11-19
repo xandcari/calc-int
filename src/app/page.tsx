@@ -1,4 +1,5 @@
 import Image from "next/image";
+import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -203,6 +204,9 @@ function CabeceraHome() {
     </header>
   );
 }
+
+/** La portada es la única página con canonical a «/»; las del recorrido declaran el suyo. */
+export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 export default function Home() {
   return (

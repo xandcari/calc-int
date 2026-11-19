@@ -79,7 +79,7 @@ export function PieHome({ enlaces }: { enlaces: EnlacePie[] }) {
               <li key={e.href}>
                 <a
                   href={e.href}
-                  className="rounded underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700"
+                  className="inline-block rounded py-0.5 underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700"
                 >
                   {e.texto}
                 </a>

@@ -16,7 +16,7 @@ export function MenuUsuario() {
   if (isPending) return null;
 
   const clases =
-    "block max-w-full truncate text-sm font-semibold text-primary-700 underline-offset-2 hover:underline " +
+    "block min-h-6 max-w-full truncate text-sm leading-6 font-semibold text-primary-700 underline-offset-2 hover:underline " +
     "focus-visible:outline-2 focus-visible:outline-primary-600";
 
   return sesion ? (

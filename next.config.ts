@@ -10,6 +10,9 @@ const encabezadosDeSeguridad = [
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
   // Obliga a usar HTTPS durante 1 año (los navegadores lo ignoran en http://localhost).
   { key: "Strict-Transport-Security", value: "max-age=31536000" },
+  // CSP mínima que no rompe nada: nadie puede enmarcar la app, cambiar la base de las URL ni cargar plugins.
+  // (Una CSP estricta para scripts y estilos necesita un inventario previo: ver docs/seguridad.md.)
+  { key: "Content-Security-Policy", value: "frame-ancestors 'none'; base-uri 'self'; object-src 'none'" },
 ];
 
 const nextConfig: NextConfig = {
