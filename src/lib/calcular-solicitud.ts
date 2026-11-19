@@ -80,7 +80,7 @@ export function armarCalculo(solicitud: CalculateRequest): { calculo: Calculo; e
     id: "solicitud-api",
     configuracion: {
       tipo: c.tipo,
-      ruta: c.ruta as any, // <-- Casteamos como any para satisfacer el tipo estricto del dominio
+      ruta: c.ruta as Calculo["configuracion"]["ruta"],
       nombre: c.nombre,
       moneda: c.moneda,
       unidadVenta: c.unidadVenta,

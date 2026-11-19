@@ -78,8 +78,15 @@ export default function PruebaDeUsuario() {
   }, []);
 
   useEffect(() => {
-    if (hayUsuario) void recargar();
-  }, [hayUsuario, recargar]);
+    if (!hayUsuario) return;
+    let activo = true;
+    listarMisCalculos().then((d) => {
+      if (activo) setDatos(d);
+    });
+    return () => {
+      activo = false;
+    };
+  }, [hayUsuario]);
 
   const lista = useMemo(() => (datos ? ordenar(datos.calculos, orden) : []), [datos, orden]);
 
