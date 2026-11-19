@@ -5,6 +5,7 @@ import { useMemo, useState, type ReactNode } from "react";
 
 import { Ayuda } from "@/components/ui/ayuda";
 import { Aviso } from "@/components/ui/aviso";
+import { BarraNavegacion } from "@/components/ui/barra-navegacion";
 import { Boton, BotonLink } from "@/components/ui/boton";
 import { Campo } from "@/components/ui/campo";
 import { CampoMonto } from "@/components/ui/campo-monto";
@@ -482,7 +483,7 @@ function Formulario() {
                 : "La harina, la caja, la etiqueta — todo lo que se usa en cada unidad."}
             </Encabezado>
             <div className="mb-4">
-              <Aviso tono="consejo">
+              <Aviso tono="consejo" titulo={esReventa ? "No te olvides de cargar lo que te cuesta el producto" : undefined}>
                 {esReventa
                   ? "Si comprás una caja de 12 termos a $96.000, el precio de compra por unidad es $8.000. Sumá el packaging de cada uno."
                   : esLotes
@@ -497,6 +498,7 @@ function Formulario() {
               placeholderNombre={esReventa ? "Ej: Precio de compra mayorista" : "Ej: Materia prima"}
               placeholderValor={esReventa ? "8000" : "85"}
               etiquetaAgregar={esReventa ? "Agregar precio de compra o packaging" : "Agregar insumo o material"}
+              sugeridos={esReventa ? ["Precio de compra del producto", "Envoltorio", "Bolsas", "Etiqueta"] : ["Envoltorio", "Bolsas", "Etiqueta"]}
               onCambiar={cambiar("variable")}
               onCambiarBase={esLotes ? (id, base) => actualizarConcepto("variable", id, { base }) : undefined}
               onEliminar={(id) => eliminarConcepto("variable", id)}
@@ -528,12 +530,12 @@ function Formulario() {
         </p>
       ) : null}
 
-      <div className="flex items-center justify-between gap-4">
+      <BarraNavegacion>
         <Boton variante="secundario" onClick={atras}>
           ← Atrás
         </Boton>
         <Boton onClick={continuar}>Ver resumen de costos →</Boton>
-      </div>
+      </BarraNavegacion>
     </div>
   );
 }

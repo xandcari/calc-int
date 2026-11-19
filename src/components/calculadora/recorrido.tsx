@@ -29,7 +29,7 @@ function NombreDelProducto() {
 function BotonReiniciar({ alReiniciar }: { alReiniciar: () => void }) {
   const router = useRouter();
   const [confirmando, setConfirmando] = useState(false);
-  // El enlace «Guardar mi resumen» solo tiene sentido donde hay un resumen para guardar (el simulador).
+  // El enlace «Descargar mi resumen» solo tiene sentido donde hay un resumen para guardar (el simulador).
   const [puedeGuardar, setPuedeGuardar] = useState(false);
   const reiniciar = useCalculoStore((s) => s.reiniciar);
 
@@ -68,7 +68,7 @@ function BotonReiniciar({ alReiniciar }: { alReiniciar: () => void }) {
             }}
             className="rounded text-sm font-medium text-gray-900 underline underline-offset-4 hover:text-primary-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700"
           >
-            Guardar mi resumen antes de reiniciar
+            Descargar mi resumen antes de reiniciar
           </button>
         ) : null}
       </DialogoConfirmar>

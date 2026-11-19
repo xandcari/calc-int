@@ -5,6 +5,7 @@ import { useId } from "react";
 
 import { Aviso } from "@/components/ui/aviso";
 import { Ayuda } from "@/components/ui/ayuda";
+import { BarraNavegacion } from "@/components/ui/barra-navegacion";
 import { BotonLink } from "@/components/ui/boton";
 import { CampoMonto } from "@/components/ui/campo-monto";
 import { ComoSeCalcula } from "@/components/ui/como-se-calcula";
@@ -235,14 +236,14 @@ function Precio() {
         <Aviso tono="info">Ingresá tu precio de venta para ver tu contribución, tu ganancia y tu punto de equilibrio.</Aviso>
       )}
 
-      <div className="flex items-center justify-between gap-3">
+      <BarraNavegacion>
         <BotonLink href="/calculadora/resumen" variante="secundario">
           ← Atrás
         </BotonLink>
         <BotonLink href="/calculadora/simulador" onClick={() => cambiarPaso("simulador")}>
           Ver simulador →
         </BotonLink>
-      </div>
+      </BarraNavegacion>
     </div>
   );
 }
@@ -272,7 +273,7 @@ function Resultados({
       >
         <div className="flex items-center gap-2">
           <h2 id="contribucion" className="text-base font-medium text-gray-900">
-            Margen de Contribución
+            Lo que aporta cada venta (margen de contribución)
           </h2>
           <Ayuda
             sobre="margen de contribución"

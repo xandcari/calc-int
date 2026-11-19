@@ -93,6 +93,7 @@ export function ListaConceptos({
                   id={idNombre}
                   type="text"
                   autoComplete="off"
+                  maxLength={200}
                   aria-label={`Nombre del ${nombreFila} ${i + 1}`}
                   aria-invalid={errorNombre ? true : undefined}
                   aria-describedby={errorNombre ? idErrores : undefined}

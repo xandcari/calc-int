@@ -22,7 +22,7 @@ interface PropsResumenFinal {
 /**
  * Vista final con los principales resultados y los supuestos usados (brief, sección «Resumen»).
  * Solo MUESTRA lo que ya calculó el motor: no hace ningún cálculo propio.
- * «Guardar resumen» abre la ventana de impresión del navegador, desde donde se guarda como PDF.
+ * «Descargar PDF» abre la ventana de impresión del navegador, desde donde se guarda como PDF.
  */
 export function ResumenFinal({ calculo, resumen, analisis }: PropsResumenFinal) {
   const { configuracion, precio } = calculo;
@@ -63,7 +63,7 @@ export function ResumenFinal({ calculo, resumen, analisis }: PropsResumenFinal) 
           </p>
         </div>
         <Boton variante="secundario" onClick={guardar} className="print:hidden">
-          Guardar resumen (PDF)
+          Descargar PDF
         </Boton>
       </div>
 

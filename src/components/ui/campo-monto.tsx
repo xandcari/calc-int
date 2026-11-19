@@ -27,6 +27,9 @@ interface PropsCampoMonto {
   ref?: Ref<HTMLInputElement>;
 }
 
+/** Caracteres máximos al escribir un importe (incluye separadores). */
+const MAX_CARACTERES_MONTO = 30;
+
 /** El estado guarda "12.5"; se muestra como lo escribe el usuario ("12,5"). */
 function aTexto(valor: string): string {
   return valor.replace(".", ",");
@@ -67,6 +70,8 @@ export function CampoMonto({
         type="text"
         inputMode="decimal"
         autoComplete="off"
+        // Tope de caracteres: el servidor rechaza importes de más de 15 enteros y 10 decimales al guardar.
+        maxLength={MAX_CARACTERES_MONTO}
         aria-label={ariaLabel}
         aria-invalid={invalido || undefined}
         aria-describedby={invalido ? idError : undefined}

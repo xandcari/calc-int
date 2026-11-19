@@ -10,7 +10,7 @@ import { enlaceCompartido, esCalculoGuardado, guardarCalculo, type ResultadoGuar
 import { useCalculoStore } from "@/store/calculo-store";
 
 /**
- * Botón básico «Guardar y compartir» (versión provisoria del backend, sin diseño final).
+ * Botón «Guardar en mi cuenta» (versión provisoria del backend, sin diseño final).
  * Guarda el cálculo actual en la base de datos y muestra el link. Si no hay sesión, lo avisa.
  * Si el cálculo cargado es de otra persona, el servidor responde 403 y se muestra el mensaje.
  */
@@ -31,7 +31,7 @@ export function BotonGuardar() {
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap gap-3">
         <Boton onClick={() => guardar()} disabled={guardando}>
-          {guardando ? "Guardando…" : yaGuardado ? "Guardar cambios" : "Guardar y compartir"}
+          {guardando ? "Guardando…" : yaGuardado ? "Actualizar mi cálculo" : "Guardar en mi cuenta"}
         </Boton>
         {yaGuardado ? (
           <Boton variante="secundario" onClick={() => guardar(true)} disabled={guardando}>

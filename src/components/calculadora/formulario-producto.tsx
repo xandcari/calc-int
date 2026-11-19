@@ -7,6 +7,7 @@ import { Controller, useForm } from "react-hook-form";
 
 import { Ayuda } from "@/components/ui/ayuda";
 import { Aviso } from "@/components/ui/aviso";
+import { BarraNavegacion } from "@/components/ui/barra-navegacion";
 import { Boton } from "@/components/ui/boton";
 import { Campo, clasesCampo } from "@/components/ui/campo";
 import { DialogoConfirmar } from "@/components/ui/dialogo-confirmar";
@@ -311,9 +312,9 @@ function Formulario() {
         El 70% de los emprendedores fijan precios sin calcular su costo real. Vos ya estás haciendo las cosas bien.
       </Aviso>
 
-      <div className="flex justify-end">
+      <BarraNavegacion soloDerecha>
         <Boton type="submit">Continuar →</Boton>
-      </div>
+      </BarraNavegacion>
 
       <DialogoConfirmar
         abierto={rutaPendiente !== null}
