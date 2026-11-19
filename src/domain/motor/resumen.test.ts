@@ -24,7 +24,7 @@ const torta: Pick<Calculo, "configuracion" | "costosFijos" | "costosVariables" |
     { id: "vacio", nombre: "", categoria: "fijo", monto: "", frecuencia: "mensual" },
   ],
   costosIndirectos: [{ id: "d", nombre: "Comisiones", categoria: "indirecto", monto: "1200", frecuencia: "mensual" }],
-  trabajoPropio: { incluir: true, horasPorLote: "4", horasMensuales: "24", valorHora: "20000", sueldoMensual: "" },
+  trabajoPropio: { incluir: true, horasPorLote: "4", horasMensuales: "24", valorHora: "20000", sueldoMensual: "", modoSueldo: "fijo", horasAlMes: "" },
   costosVariables: [
     { id: "e", nombre: "Materia prima", categoria: "variable", montoUnitario: "60" },
     { id: "f", nombre: "Empaque", categoria: "variable", montoUnitario: "15" },

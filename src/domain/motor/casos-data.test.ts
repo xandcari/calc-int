@@ -27,7 +27,7 @@ function remeras(volumen = "100"): Entrada {
     ],
     costosIndirectos: [],
     // «Sueldo propio $70.000» = 70 hs × $1.000 (equivalente mensual).
-    trabajoPropio: { incluir: true, horasPorLote: "70", horasMensuales: "70", valorHora: "1000", sueldoMensual: "" },
+    trabajoPropio: { incluir: true, horasPorLote: "70", horasMensuales: "70", valorHora: "1000", sueldoMensual: "", modoSueldo: "fijo", horasAlMes: "" },
     costosVariables: [
       { id: "c", nombre: "Tela", categoria: "variable", montoUnitario: "3000" },
       { id: "d", nombre: "Estampa", categoria: "variable", montoUnitario: "1500" },
@@ -134,7 +134,7 @@ describe("«Regla del 1» de Data (reventa): 1 unidad por lote y en «Lotes por 
     configuracion: { ...CONFIGURACION_INICIAL, unidadesPorLote: "1", lotes: "200", volumenMensual: "200" },
     costosFijos: [{ id: "a", nombre: "Local", categoria: "fijo", monto: "20000", frecuencia: "mensual" }],
     costosIndirectos: [],
-    trabajoPropio: { incluir: true, horasPorLote: "0.25", horasMensuales: "50", valorHora: "2000", sueldoMensual: "" },
+    trabajoPropio: { incluir: true, horasPorLote: "0.25", horasMensuales: "50", valorHora: "2000", sueldoMensual: "", modoSueldo: "fijo", horasAlMes: "" },
     costosVariables: [{ id: "b", nombre: "Compra del producto", categoria: "variable", montoUnitario: "3000" }],
   };
 
@@ -175,7 +175,7 @@ function simulador(parcial: Pick<Entrada, "configuracion" | "trabajoPropio"> & {
 describe("Simulador bifurcado · pestaña 4_REVENDEDOR_ALT2 (sueldo fijo)", () => {
   const caso = simulador({
     configuracion: { ...CONFIGURACION_INICIAL, ruta: "reventa", unidadesPorLote: "1", lotes: "100", volumenMensual: "100" },
-    trabajoPropio: { incluir: true, horasPorLote: "", horasMensuales: "", valorHora: "", sueldoMensual: "150000" },
+    trabajoPropio: { incluir: true, horasPorLote: "", horasMensuales: "", valorHora: "", sueldoMensual: "150000", modoSueldo: "fijo", horasAlMes: "" },
     cvu: ["3000", "50"],
   });
   const r = calcularResumenCostos(caso);
@@ -204,7 +204,7 @@ describe("Simulador bifurcado · pestaña 1_MODO_LOTES", () => {
   it("4 lotes × 6 hs × $2.000 = $48.000 de trabajo y CFT $69.200 (la planilla tiene el volumen en 0)", () => {
     const caso = simulador({
       configuracion: { ...CONFIGURACION_INICIAL, ruta: "lotes", unidadesPorLote: "25", lotes: "4", volumenMensual: "100" },
-      trabajoPropio: { incluir: true, horasPorLote: "6", horasMensuales: "24", valorHora: "2000", sueldoMensual: "" },
+      trabajoPropio: { incluir: true, horasPorLote: "6", horasMensuales: "24", valorHora: "2000", sueldoMensual: "", modoSueldo: "fijo", horasAlMes: "" },
       cvu: ["60", "25"],
     });
     const r = calcularResumenCostos(caso);
@@ -218,7 +218,7 @@ describe("Simulador bifurcado · pestaña 2_MODO_UNIDAD", () => {
   it("8 hs por unidad × $2.500 × 10 unidades = $200.000 de trabajo (la planilla tiene el volumen en 0)", () => {
     const caso = simulador({
       configuracion: { ...CONFIGURACION_INICIAL, ruta: "unidad", unidadesPorLote: "1", lotes: "10", volumenMensual: "10" },
-      trabajoPropio: { incluir: true, horasPorLote: "8", horasMensuales: "80", valorHora: "2500", sueldoMensual: "" },
+      trabajoPropio: { incluir: true, horasPorLote: "8", horasMensuales: "80", valorHora: "2500", sueldoMensual: "", modoSueldo: "fijo", horasAlMes: "" },
       cvu: ["60", "25"],
     });
     const r = calcularResumenCostos(caso);
@@ -231,7 +231,7 @@ describe("Simulador bifurcado · pestaña 4, paso 5: suba de costos del 20 %", (
   it("el CVU pasa de $3.050 a $3.660, el costo unitario a $5.372 y el equilibrio a 41 unidades", () => {
     const caso = simulador({
       configuracion: { ...CONFIGURACION_INICIAL, ruta: "reventa", unidadesPorLote: "1", lotes: "100", volumenMensual: "100" },
-      trabajoPropio: { incluir: true, horasPorLote: "", horasMensuales: "", valorHora: "", sueldoMensual: "150000" },
+      trabajoPropio: { incluir: true, horasPorLote: "", horasMensuales: "", valorHora: "", sueldoMensual: "150000", modoSueldo: "fijo", horasAlMes: "" },
       cvu: ["3000", "50"],
     });
     const nuevo = simularEscenario(caso, precioPorMargen(caso, "40")!, "insumos", "20")!;

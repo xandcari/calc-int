@@ -115,6 +115,9 @@ export const esquemaCalculo = z.object({
     horasMensuales: importeNoNegativo,
     valorHora: importeNoNegativo,
     sueldoMensual: importeNoNegativo.default(""),
+    // Solo «reventa»: sueldo fijo u horas al mes × valor por hora. Un cliente viejo que no lo manda queda con sueldo fijo.
+    modoSueldo: z.enum(["fijo", "horas"]).default("fijo"),
+    horasAlMes: importeNoNegativo.default(""),
   }),
   precio: z.object({
     modo: z.enum(["margen", "manual"]),

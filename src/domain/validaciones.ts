@@ -29,6 +29,7 @@ const MENSAJES = {
   horasNegativas: "Las horas no pueden ser negativas.",
   valorHoraVacio: "Indicá cuánto querés ganar por hora.",
   sueldoVacio: "Indicá cuánto querés ganar por mes.",
+  horasMesVacias: "Indicá cuántas horas trabajás por mes.",
 } as const;
 
 /**
@@ -173,9 +174,11 @@ export function validarCostos(calculo: Calculo): ErrorValidacion[] {
     ),
   ];
 
-  // Trabajo propio. «Reventa»: un solo dato, el sueldo mensual. Las otras rutas: si completó uno de los dos, el otro también.
-  const { horasPorLote, valorHora, sueldoMensual } = calculo.trabajoPropio;
-  if (calculo.configuracion.ruta === "reventa") {
+  // Trabajo propio. «Reventa» con sueldo fijo: un solo dato, el sueldo mensual. Las otras rutas, y «reventa» por horas
+  // al mes: si completó uno de los dos datos (horas y valor por hora), el otro también.
+  const { horasPorLote, valorHora, sueldoMensual, modoSueldo, horasAlMes } = calculo.trabajoPropio;
+  const reventaPorHoras = calculo.configuracion.ruta === "reventa" && modoSueldo === "horas";
+  if (calculo.configuracion.ruta === "reventa" && !reventaPorHoras) {
     if (!estaVacio(sueldoMensual)) {
       // El sueldo pretendido puede ser cero (el MVP pide mayor o igual a cero).
       const sueldo = montoNoNegativo(MENSAJES.sueldoVacio).safeParse(sueldoMensual);
@@ -183,13 +186,18 @@ export function validarCostos(calculo: Calculo): ErrorValidacion[] {
         errores.push({ campo: "trabajoPropio.sueldoMensual", mensaje: sueldo.error.issues[0].message, severidad: "error" });
       }
     }
-  } else if (!estaVacio(horasPorLote) || !estaVacio(valorHora)) {
+  } else if (!estaVacio(reventaPorHoras ? horasAlMes : horasPorLote) || !estaVacio(valorHora)) {
     // Las horas no pueden ser negativas; cero es válido.
-    const horas = montoNoNegativo(MENSAJES_RUTA[calculo.configuracion.ruta].horasVacias, MENSAJES.horasNegativas).safeParse(
-      horasPorLote,
+    const mensajeHorasVacias = reventaPorHoras ? MENSAJES.horasMesVacias : MENSAJES_RUTA[calculo.configuracion.ruta].horasVacias;
+    const horas = montoNoNegativo(mensajeHorasVacias, MENSAJES.horasNegativas).safeParse(
+      reventaPorHoras ? horasAlMes : horasPorLote,
     );
     if (!horas.success) {
-      errores.push({ campo: "trabajoPropio.horasPorLote", mensaje: horas.error.issues[0].message, severidad: "error" });
+      errores.push({
+        campo: reventaPorHoras ? "trabajoPropio.horasAlMes" : "trabajoPropio.horasPorLote",
+        mensaje: horas.error.issues[0].message,
+        severidad: "error",
+      });
     }
     const valor = montoNoNegativo(MENSAJES.valorHoraVacio).safeParse(valorHora);
     if (!valor.success) {

@@ -7,6 +7,7 @@ import type {
   EscenarioUsuario,
   Frecuencia,
   ModoPrecio,
+  ModoSueldo,
   PasoRecorrido,
   RutaProduccion,
   TipoOferta,
@@ -44,6 +45,8 @@ export interface ColumnasCalculo {
   trabajoHorasMensuales: string | null;
   trabajoValorHora: string | null;
   trabajoSueldoMensual: string | null;
+  trabajoModoSueldo: ModoSueldo;
+  trabajoHorasAlMes: string | null;
   precioModo: ModoPrecio;
   precioMargenPct: string | null;
   precioManual: string | null;
@@ -125,6 +128,8 @@ export function calculoAColumnas(c: CalculoParaGuardar): ColumnasCalculo {
     trabajoHorasMensuales: aColumna(c.trabajoPropio.horasMensuales),
     trabajoValorHora: aColumna(c.trabajoPropio.valorHora),
     trabajoSueldoMensual: aColumna(c.trabajoPropio.sueldoMensual),
+    trabajoModoSueldo: c.trabajoPropio.modoSueldo,
+    trabajoHorasAlMes: aColumna(c.trabajoPropio.horasAlMes),
     precioModo: c.precio.modo,
     precioMargenPct: aColumna(c.precio.margenPct),
     precioManual: aColumna(c.precio.precioManual),
@@ -226,6 +231,8 @@ export function filasACalculo(fila: FilaCalculo, hijas: FilasHijas): Calculo {
       horasMensuales: aDominio(fila.trabajoHorasMensuales),
       valorHora: aDominio(fila.trabajoValorHora),
       sueldoMensual: aDominio(fila.trabajoSueldoMensual),
+      modoSueldo: fila.trabajoModoSueldo,
+      horasAlMes: aDominio(fila.trabajoHorasAlMes),
     },
     precio: {
       modo: fila.precioModo,

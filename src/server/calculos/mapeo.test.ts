@@ -51,7 +51,7 @@ function calculoCompleto(): Calculo {
       { id: "v2", categoria: "variable", nombre: "Aceite", montoUnitario: "35.5" },
     ],
     costosIndirectos: [{ id: "i1", categoria: "indirecto", nombre: "Luz", monto: "9000", frecuencia: "semanal" }],
-    trabajoPropio: { incluir: true, horasPorLote: "2", horasMensuales: "8", valorHora: "5000", sueldoMensual: "" },
+    trabajoPropio: { incluir: true, horasPorLote: "2", horasMensuales: "8", valorHora: "5000", sueldoMensual: "", modoSueldo: "fijo", horasAlMes: "" },
     precio: { modo: "manual", margenPct: "40", precioManual: "12500.75" },
     pasoActual: "simulador",
   };
@@ -73,11 +73,35 @@ describe("mapeo Calculo ↔ filas", () => {
     const original = calculoCompleto();
     original.configuracion.ruta = "reventa";
     original.costosVariables = [{ id: "v1", categoria: "variable", nombre: "Reventa", montoUnitario: "900" }];
-    original.trabajoPropio = { incluir: true, horasPorLote: "", horasMensuales: "", valorHora: "", sueldoMensual: "450000.50" };
+    original.trabajoPropio = {
+      incluir: true,
+      horasPorLote: "",
+      horasMensuales: "",
+      valorHora: "",
+      sueldoMensual: "450000.50",
+      modoSueldo: "fijo",
+      horasAlMes: "",
+    };
     const leido = ida_y_vuelta(original);
     expect(leido.configuracion.ruta).toBe("reventa");
     expect(leido.trabajoPropio).toEqual(original.trabajoPropio);
     expect(leido.costosVariables).toEqual(original.costosVariables);
+  });
+
+  it("la ruta «reventa» por horas al mes vuelve idéntica (modo, horas y valor por hora)", () => {
+    const original = calculoCompleto();
+    original.configuracion.ruta = "reventa";
+    original.trabajoPropio = {
+      incluir: true,
+      horasPorLote: "",
+      horasMensuales: "",
+      valorHora: "5000.50",
+      sueldoMensual: "",
+      modoSueldo: "horas",
+      horasAlMes: "40",
+    };
+    const leido = ida_y_vuelta(original);
+    expect(leido.trabajoPropio).toEqual(original.trabajoPropio);
   });
 
   it("la base del insumo solo aparece si se indicó (null en la BD = no se indicó)", () => {

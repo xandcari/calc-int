@@ -69,9 +69,8 @@ function tocar(calculo: Calculo, ahora: string): Calculo {
  * el sueldo mensual en «reventa»; las horas o el valor por hora en las otras dos.
  */
 function trabajoIncluido(ruta: RutaProduccion, t: TrabajoPropio): boolean {
-  return ruta === "reventa"
-    ? !estaVacio(t.sueldoMensual)
-    : !estaVacio(t.horasPorLote) || !estaVacio(t.valorHora);
+  if (ruta !== "reventa") return !estaVacio(t.horasPorLote) || !estaVacio(t.valorHora);
+  return t.modoSueldo === "horas" ? !estaVacio(t.horasAlMes) || !estaVacio(t.valorHora) : !estaVacio(t.sueldoMensual);
 }
 
 /** Recalcula lo derivado de los lotes: volumen mensual y horas mensuales. */
@@ -124,7 +123,7 @@ export function datosQueSePierdenAlCambiarRuta(calculo: Calculo, ruta: RutaProdu
   if (actual === "lotes" && calculo.costosVariables.some((c) => c.base === "lote" && !estaVacio(c.montoUnitario))) {
     perdidos.push("los insumos cargados por lote");
   }
-  if (!estaVacio(calculo.trabajoPropio.horasPorLote)) {
+  if (!estaVacio(calculo.trabajoPropio.horasPorLote) || !estaVacio(calculo.trabajoPropio.horasAlMes)) {
     perdidos.push("las horas de trabajo");
   }
   return perdidos;
@@ -153,7 +152,7 @@ export function cambiarRuta(calculo: Calculo, ruta: RutaProduccion, ahora: strin
     unidadesPorLote: directaAhora ? "1" : "",
     lotes: directaAhora ? (conservar ? calculo.configuracion.lotes : "") : "1",
   };
-  const trabajoPropio: TrabajoPropio = { ...calculo.trabajoPropio, horasPorLote: "" };
+  const trabajoPropio: TrabajoPropio = { ...calculo.trabajoPropio, horasPorLote: "", horasAlMes: "" };
   trabajoPropio.incluir = trabajoIncluido(ruta, trabajoPropio);
 
   const costosVariables = calculo.costosVariables.map((c) =>
@@ -165,7 +164,7 @@ export function cambiarRuta(calculo: Calculo, ruta: RutaProduccion, ahora: strin
 
 export function actualizarTrabajoPropio(
   calculo: Calculo,
-  cambios: Partial<Pick<TrabajoPropio, "horasPorLote" | "valorHora" | "sueldoMensual">>,
+  cambios: Partial<Pick<TrabajoPropio, "horasPorLote" | "valorHora" | "sueldoMensual" | "modoSueldo" | "horasAlMes">>,
   ahora: string,
 ): Calculo {
   const trabajoPropio = { ...calculo.trabajoPropio, ...cambios };

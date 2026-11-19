@@ -97,6 +97,8 @@ export function armarCalculo(solicitud: CalculateRequest): { calculo: Calculo; e
       horasMensuales,
       valorHora: t.valorHora,
       sueldoMensual: t.sueldoMensual,
+      modoSueldo: t.modoSueldo,
+      horasAlMes: t.horasAlMes,
     },
     precio: solicitud.precio ?? PRECIO_INICIAL,
     escenarios: [],
@@ -128,7 +130,10 @@ export function validarSolicitud(calculo: Calculo, solicitud: CalculateRequest):
   // Declarar que se incluye el trabajo propio sin enviar el dato no puede valer cero en silencio.
   const t = calculo.trabajoPropio;
   if (t.incluir) {
-    if (ruta === "reventa") {
+    if (ruta === "reventa" && t.modoSueldo === "horas") {
+      if (estaVacio(t.horasAlMes)) errores.push({ campo: "trabajoPropio.horasAlMes", mensaje: "Indicá cuántas horas trabajás por mes." });
+      if (estaVacio(t.valorHora)) errores.push({ campo: "trabajoPropio.valorHora", mensaje: "Indicá cuánto querés ganar por hora." });
+    } else if (ruta === "reventa") {
       if (estaVacio(t.sueldoMensual)) errores.push({ campo: "trabajoPropio.sueldoMensual", mensaje: "Indicá cuánto querés ganar por mes." });
     } else {
       if (estaVacio(t.horasPorLote)) errores.push({ campo: "trabajoPropio.horasPorLote", mensaje: MENSAJES_RUTA[ruta].horasVacias });

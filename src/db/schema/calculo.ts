@@ -34,6 +34,9 @@ export const modoPrecio = pgEnum("modo_precio", ["margen", "manual"]);
 export const rutaProduccion = pgEnum("ruta_produccion", ["lotes", "unidad", "reventa"]);
 /** Base del monto de un insumo: NULL = «por unidad» (no se indicó). Solo «lotes» admite «lote». */
 export const baseInsumo = pgEnum("base_insumo", ["unidad", "lote"]);
+
+/** Cómo define su sueldo quien revende: monto fijo por mes u horas al mes × valor por hora. */
+export const modoSueldo = pgEnum("modo_sueldo", ["fijo", "horas"]);
 export const pasoRecorrido = pgEnum("paso_recorrido", [
   "configuracion",
   "costos",
@@ -47,8 +50,10 @@ export const pasoRecorrido = pgEnum("paso_recorrido", [
  *  1 = formato inicial.
  *  2 = se agregan `ruta` (paso 1), `trabajo_sueldo_mensual` y `costo_variable.base`.
  *      Los cálculos de la versión 1 se leen con ruta «lotes», sueldo vacío y base «por unidad».
+ *  3 = se agregan `trabajo_modo_sueldo` y `trabajo_horas_al_mes` (sueldo de «reventa» por horas al mes).
+ *      Los cálculos de la versión 2 se leen con sueldo fijo y horas al mes vacías.
  */
-export const VERSION_ESQUEMA = 2;
+export const VERSION_ESQUEMA = 3;
 
 /** Un cálculo guardado. Su `id` es el que va en el link para compartir. */
 export const calculo = pgTable(
@@ -82,6 +87,10 @@ export const calculo = pgTable(
     trabajoValorHora: numeric("trabajo_valor_hora"),
     /** Sueldo fijo mensual (solo la ruta «reventa»). */
     trabajoSueldoMensual: numeric("trabajo_sueldo_mensual"),
+    /** Solo «reventa»: sueldo fijo u horas al mes × valor por hora. */
+    trabajoModoSueldo: modoSueldo("trabajo_modo_sueldo").notNull().default("fijo"),
+    /** Solo «reventa» por horas al mes: horas que trabaja por mes. */
+    trabajoHorasAlMes: numeric("trabajo_horas_al_mes"),
 
     // Precio (paso 4)
     precioModo: modoPrecio("precio_modo").notNull(),
