@@ -25,7 +25,8 @@ import {
 
 const CLAVE_LOCALES = "preciar-anotaciones-locales";
 const CLAVE_CACHE = "preciar-anotaciones-equipo";
-const VIGENCIA_CACHE_MS = 60_000;
+/** GitHub deja 60 consultas por hora sin iniciar sesión: se reutiliza lo leído durante unos minutos. */
+const VIGENCIA_CACHE_MS = 5 * 60_000;
 
 const escuchas = new Set<() => void>();
 let copiaLocales = "[]";
@@ -125,7 +126,7 @@ export function Anotaciones() {
 
   const locales = parsearLocales(useLocalesCrudo());
   const [remotas, setRemotas] = useState<Anotacion[]>([]);
-  const [errorLectura, setErrorLectura] = useState(false);
+  const [errorLectura, setErrorLectura] = useState<"limite" | "red" | null>(null);
   const [anotando, setAnotando] = useState(false);
   const [verPines, setVerPines] = useState(true);
   const [borrador, setBorrador] = useState<Omit<Anotacion, "id" | "idLocal" | "texto" | "tipo" | "remota"> | null>(null);
@@ -137,21 +138,19 @@ export function Anotaciones() {
   const capa = useRef<HTMLDivElement>(null);
   const cuadro = useRef<number | null>(null);
 
-  /* Notas del equipo: Issues abiertos con la etiqueta (con una pequeña caché para no pasar el límite de GitHub). */
+  /* Notas del equipo: Issues abiertos con la etiqueta (con caché para no pasar el límite de GitHub). */
   const cargarRemotas = useCallback(async (forzar: boolean) => {
+    let guardada: { t: number; lista: Anotacion[] } | null = null;
     try {
-      if (!forzar) {
-        const guardado = window.sessionStorage.getItem(CLAVE_CACHE);
-        if (guardado) {
-          const { t, lista } = JSON.parse(guardado) as { t: number; lista: Anotacion[] };
-          if (Date.now() - t < VIGENCIA_CACHE_MS) {
-            setRemotas(lista);
-            return;
-          }
-        }
-      }
+      const crudo = window.localStorage.getItem(CLAVE_CACHE);
+      if (crudo) guardada = JSON.parse(crudo) as { t: number; lista: Anotacion[] };
     } catch {
       /* sin caché: se consulta igual */
+    }
+    if (guardada && !forzar && Date.now() - guardada.t < VIGENCIA_CACHE_MS) {
+      setRemotas(guardada.lista);
+      setErrorLectura(null);
+      return;
     }
     try {
       const resp = await fetch(urlListaIssues(), { headers: { Accept: "application/vnd.github+json" } });
@@ -159,14 +158,16 @@ export function Anotaciones() {
       const issues = (await resp.json()) as IssueGitHub[];
       const lista = issues.map(desdeIssue).filter((a): a is Anotacion => a !== null);
       setRemotas(lista);
-      setErrorLectura(false);
+      setErrorLectura(null);
       try {
-        window.sessionStorage.setItem(CLAVE_CACHE, JSON.stringify({ t: Date.now(), lista }));
+        window.localStorage.setItem(CLAVE_CACHE, JSON.stringify({ t: Date.now(), lista }));
       } catch {
         /* sin caché */
       }
-    } catch {
-      setErrorLectura(true);
+    } catch (e) {
+      // Si hay algo leído antes se sigue mostrando, aunque esté un poco viejo.
+      if (guardada) setRemotas(guardada.lista);
+      setErrorLectura(e instanceof Error && e.message === "403" ? "limite" : "red");
     }
   }, []);
 
@@ -335,7 +336,9 @@ export function Anotaciones() {
             onClick={() => void cargarRemotas(true)}
             className="rounded-lg bg-danger-50 px-3 py-2 text-left text-xs text-danger-700 shadow focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700"
           >
-            No pude leer las notas del equipo. Tocá para reintentar.
+            {errorLectura === "limite"
+              ? "GitHub limitó las consultas por un rato: las notas del equipo pueden estar desactualizadas. Tocá para reintentar."
+              : "No pude leer las notas del equipo. Tocá para reintentar."}
           </button>
         ) : null}
       </div>
