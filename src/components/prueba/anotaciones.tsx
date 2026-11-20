@@ -334,7 +334,7 @@ export function Anotaciones() {
           <button
             type="button"
             onClick={() => void cargarRemotas(true)}
-            className="rounded-lg bg-danger-50 px-3 py-2 text-left text-xs text-danger-700 shadow focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700"
+            className="max-w-56 rounded-lg bg-danger-50 px-3 py-2 text-left text-xs text-danger-700 shadow focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700"
           >
             {errorLectura === "limite"
               ? "GitHub limitó las consultas por un rato: las notas del equipo pueden estar desactualizadas. Tocá para reintentar."
