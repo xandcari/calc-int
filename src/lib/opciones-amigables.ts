@@ -94,11 +94,11 @@ export function marcarBienvenidaVista() {
   avisar();
 }
 
-/** `?opciones` en la dirección muestra el selector para comparar los estilos. */
+/** `?opciones` en la dirección muestra el selector para comparar los estilos (en la app de prueba, siempre). */
 export function useModoOpciones(): boolean {
   return useSyncExternalStore(
     suscribir,
-    () => new URLSearchParams(window.location.search).has("opciones"),
+    () => process.env.NEXT_PUBLIC_MODO_PRUEBA === "1" || new URLSearchParams(window.location.search).has("opciones"),
     () => false,
   );
 }

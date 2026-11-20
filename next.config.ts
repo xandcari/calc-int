@@ -15,9 +15,12 @@ const encabezadosDeSeguridad = [
   { key: "Content-Security-Policy", value: "frame-ancestors 'none'; base-uri 'self'; object-src 'none'" },
 ];
 
+// En la app de prueba también se pide a los buscadores que no la indexen.
+const sinIndexar = process.env.NEXT_PUBLIC_MODO_PRUEBA === "1" ? [{ key: "X-Robots-Tag", value: "noindex, nofollow" }] : [];
+
 const nextConfig: NextConfig = {
   async headers() {
-    return [{ source: "/:path*", headers: encabezadosDeSeguridad }];
+    return [{ source: "/:path*", headers: [...encabezadosDeSeguridad, ...sinIndexar] }];
   },
 };
 
